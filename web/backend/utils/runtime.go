@@ -1,3 +1,4 @@
+// web/backend/utils/runtime.go
 package utils
 
 import (
@@ -9,33 +10,33 @@ import (
 	"runtime"
 )
 
-// GetDefaultConfigPath returns the default path to the picoclaw config file.
+// GetDefaultConfigPath returns the default path to the permaclaw config file.
 func GetDefaultConfigPath() string {
-	if configPath := os.Getenv("PICOCLAW_CONFIG"); configPath != "" {
+	if configPath := os.Getenv("PERMACLAW_CONFIG"); configPath != "" {
 		return configPath
 	}
-	if picoclawHome := os.Getenv("PICOCLAW_HOME"); picoclawHome != "" {
-		return filepath.Join(picoclawHome, "config.json")
+	if permaclawHome := os.Getenv("PERMACLAW_HOME"); permaclawHome != "" {
+		return filepath.Join(permaclawHome, "config.json")
 	}
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return "config.json"
 	}
-	return filepath.Join(home, ".picoclaw", "config.json")
+	return filepath.Join(home, ".permaclaw", "config.json")
 }
 
-// FindPicoclawBinary locates the picoclaw executable.
+// FindPermaclawBinary locates the permaclaw executable.
 // Search order:
-//  1. PICOCLAW_BINARY environment variable (explicit override)
+//  1. PERMACLAW_BINARY environment variable (explicit override)
 //  2. Same directory as the current executable
-//  3. Falls back to "picoclaw" and relies on $PATH
-func FindPicoclawBinary() string {
-	binaryName := "picoclaw"
+//  3. Falls back to "permaclaw" and relies on $PATH
+func FindPermaclawBinary() string {
+	binaryName := "permaclaw"
 	if runtime.GOOS == "windows" {
-		binaryName = "picoclaw.exe"
+		binaryName = "permaclaw.exe"
 	}
 
-	if p := os.Getenv("PICOCLAW_BINARY"); p != "" {
+	if p := os.Getenv("PERMACLAW_BINARY"); p != "" {
 		if info, _ := os.Stat(p); info != nil && !info.IsDir() {
 			return p
 		}
@@ -48,7 +49,7 @@ func FindPicoclawBinary() string {
 		}
 	}
 
-	return "picoclaw"
+	return "permaclaw"
 }
 
 // GetLocalIP returns the local IP address of the machine.

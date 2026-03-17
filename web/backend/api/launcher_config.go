@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/sipeed/picoclaw/web/backend/launcherconfig"
+	"github.com/aostore-ar/permaclaw/web/backend/launcherconfig"
 )
 
 type launcherConfigPayload struct {
-	Port         int      `json:"port"`
-	Public       bool     `json:"public"`
+	Port        int      `json:"port"`
+	Public      bool     `json:"public"`
 	AllowedCIDRs []string `json:"allowed_cidrs"`
 }
 
@@ -48,8 +48,8 @@ func (h *Handler) handleGetLauncherConfig(w http.ResponseWriter, r *http.Request
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(launcherConfigPayload{
-		Port:         cfg.Port,
-		Public:       cfg.Public,
+		Port:        cfg.Port,
+		Public:      cfg.Public,
 		AllowedCIDRs: append([]string(nil), cfg.AllowedCIDRs...),
 	})
 }
@@ -78,8 +78,8 @@ func (h *Handler) handleUpdateLauncherConfig(w http.ResponseWriter, r *http.Requ
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(launcherConfigPayload{
-		Port:         cfg.Port,
-		Public:       cfg.Public,
+		Port:        cfg.Port,
+		Public:      cfg.Public,
 		AllowedCIDRs: append([]string(nil), cfg.AllowedCIDRs...),
 	})
 }

@@ -38,7 +38,7 @@ func (h *Handler) registerChannelRoutes(mux *http.ServeMux) {
 
 // handleListChannelCatalog returns the channels supported by backend.
 //
-//	GET /api/channels/catalog
+// GET /api/channels/catalog
 func (h *Handler) handleListChannelCatalog(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]any{

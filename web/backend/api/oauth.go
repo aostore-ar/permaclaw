@@ -1,3 +1,5 @@
+// backend/api/oauth.go
+
 package api
 
 import (
@@ -12,9 +14,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sipeed/picoclaw/pkg/auth"
-	"github.com/sipeed/picoclaw/pkg/config"
-	"github.com/sipeed/picoclaw/pkg/providers"
+	"github.com/aostore-ar/permaclaw/pkg/auth"
+	"github.com/aostore-ar/permaclaw/pkg/config"
+	"github.com/aostore-ar/permaclaw/pkg/providers"
 )
 
 const (
@@ -33,9 +35,9 @@ const (
 )
 
 const (
-	oauthBrowserFlowTTL    = 10 * time.Minute
-	oauthDeviceCodeFlowTTL = 15 * time.Minute
-	oauthTerminalFlowGC    = 30 * time.Minute
+	oauthBrowserFlowTTL     = 10 * time.Minute
+	oauthDeviceCodeFlowTTL  = 15 * time.Minute
+	oauthTerminalFlowGC     = 30 * time.Minute
 )
 
 var oauthProviderOrder = []string{
@@ -313,6 +315,7 @@ func (h *Handler) handleOAuthLogin(w http.ResponseWriter, r *http.Request) {
 			"expires_at": flow.ExpiresAt.Format(time.RFC3339),
 		})
 		return
+
 	default:
 		http.Error(w, "unsupported login method", http.StatusBadRequest)
 	}
@@ -492,7 +495,7 @@ func (h *Handler) handleOAuthLogout(w http.ResponseWriter, r *http.Request) {
 
 func renderOAuthCallbackPage(w http.ResponseWriter, flowID, status, title, errMsg string) {
 	payload := map[string]string{
-		"type":   "picoclaw-oauth-result",
+		"type":   "permaclaw-oauth-result",
 		"flowId": flowID,
 		"status": status,
 	}
@@ -515,7 +518,7 @@ func renderOAuthCallbackPage(w http.ResponseWriter, flowID, status, title, errMs
 
 	_, _ = fmt.Fprintf(
 		w,
-		"<!doctype html><html><head><meta charset=\"utf-8\"><title>PicoClaw OAuth</title></head><body><script>(function(){var payload=%s;var hasOpener=false;try{if(window.opener&&!window.opener.closed){window.opener.postMessage(payload,window.location.origin);hasOpener=true}}catch(e){}var target='/credentials?oauth_flow_id='+encodeURIComponent(payload.flowId||'')+'&oauth_status='+encodeURIComponent(payload.status||'');setTimeout(function(){if(hasOpener){window.close();return}window.location.replace(target)},800)})();</script><div style=\"font-family:Inter,system-ui,sans-serif;padding:24px\"><h2>%s</h2><p>%s</p><p>You can close this window.</p></div></body></html>",
+		"<!doctype html><html><head><meta charset=\"utf-8\"><title>PermaClaw OAuth</title></head><body><script>(function(){var payload=%s;var hasOpener=false;try{if(window.opener&&!window.opener.closed){window.opener.postMessage(payload,window.location.origin);hasOpener=true}}catch(e){}var target='/credentials?oauth_flow_id='+encodeURIComponent(payload.flowId||'')+'&oauth_status='+encodeURIComponent(payload.status||'');setTimeout(function(){if(hasOpener){window.close();return}window.location.replace(target)},800)})();</script><div style=\"font-family:Inter,system-ui,sans-serif;padding:24px\"><h2>%s</h2><p>%s</p><p>You can close this window.</p></div></body></html>",
 		string(payloadJSON),
 		html.EscapeString(title),
 		html.EscapeString(message),

@@ -1,3 +1,4 @@
+// startup.go
 package api
 
 import (
@@ -14,8 +15,8 @@ import (
 )
 
 const (
-	autoStartEntryName = "PicoClawLauncher"
-	launchAgentLabel   = "io.picoclaw.launcher"
+	autoStartEntryName = "PermaClawLauncher"
+	launchAgentLabel   = "io.permaclaw.launcher"
 )
 
 type autoStartRequest struct {
@@ -196,18 +197,18 @@ func buildDarwinPlist(exePath string, args []string) string {
 	)
 	b.WriteString(`<plist version="1.0">` + "\n")
 	b.WriteString(`<dict>` + "\n")
-	b.WriteString(`  <key>Label</key>` + "\n")
-	b.WriteString(`  <string>` + launchAgentLabel + `</string>` + "\n")
-	b.WriteString(`  <key>ProgramArguments</key>` + "\n")
-	b.WriteString(`  <array>` + "\n")
+	b.WriteString(`	<key>Label</key>` + "\n")
+	b.WriteString(`	<string>` + launchAgentLabel + `</string>` + "\n")
+	b.WriteString(`	<key>ProgramArguments</key>` + "\n")
+	b.WriteString(`	<array>` + "\n")
 	for _, arg := range programArgs {
-		b.WriteString(`    <string>` + xmlEscape(arg) + `</string>` + "\n")
+		b.WriteString(`		<string>` + xmlEscape(arg) + `</string>` + "\n")
 	}
-	b.WriteString(`  </array>` + "\n")
-	b.WriteString(`  <key>RunAtLoad</key>` + "\n")
-	b.WriteString(`  <true/>` + "\n")
-	b.WriteString(`  <key>ProcessType</key>` + "\n")
-	b.WriteString(`  <string>Background</string>` + "\n")
+	b.WriteString(`	</array>` + "\n")
+	b.WriteString(`	<key>RunAtLoad</key>` + "\n")
+	b.WriteString(`	<true/>` + "\n")
+	b.WriteString(`	<key>ProcessType</key>` + "\n")
+	b.WriteString(`	<string>Background</string>` + "\n")
 	b.WriteString(`</dict>` + "\n")
 	b.WriteString(`</plist>` + "\n")
 	return b.String()
@@ -215,7 +216,7 @@ func buildDarwinPlist(exePath string, args []string) string {
 
 func linuxAutoStartPath() string {
 	home, _ := os.UserHomeDir()
-	return filepath.Join(home, ".config", "autostart", "picoclaw-web.desktop")
+	return filepath.Join(home, ".config", "autostart", "permaclaw-web.desktop")
 }
 
 func shellQuote(s string) string {
@@ -247,8 +248,8 @@ func setLinuxAutoStart(enabled bool, exePath string, args []string) error {
 			"[Desktop Entry]",
 			"Type=Application",
 			"Version=1.0",
-			"Name=PicoClaw Web",
-			"Comment=Start PicoClaw Web on login",
+			"Name=PermaClaw Web",
+			"Comment=Start PermaClaw Web on login",
 			"Exec=" + buildLinuxExecLine(exePath, args),
 			"Terminal=false",
 			"X-GNOME-Autostart-enabled=true",

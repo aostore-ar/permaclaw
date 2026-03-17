@@ -1,3 +1,4 @@
+// tools_test.go
 package api
 
 import (
@@ -8,7 +9,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/sipeed/picoclaw/pkg/config"
+	"github.com/aostore-ar/permaclaw/pkg/config"
 )
 
 func TestHandleListTools(t *testing.T) {

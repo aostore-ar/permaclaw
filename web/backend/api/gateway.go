@@ -17,8 +17,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/sipeed/picoclaw/pkg/config"
-	"github.com/sipeed/picoclaw/web/backend/utils"
+	"github.com/aostore-ar/permaclaw/pkg/config"
+	"github.com/aostore-ar/permaclaw/web/backend/utils"
 )
 
 // gateway holds the state for the managed gateway process.
@@ -252,8 +252,8 @@ func (h *Handler) startGatewayLocked(initialStatus string) (int, error) {
 	}
 	defaultModelName := strings.TrimSpace(cfg.Agents.Defaults.GetModelName())
 
-	// Locate the picoclaw executable
-	execPath := utils.FindPicoclawBinary()
+	// Locate the permaclaw executable
+	execPath := utils.FindPermaclawBinary()
 
 	cmd := exec.Command(execPath, "gateway")
 	cmd.Env = os.Environ()
@@ -261,10 +261,10 @@ func (h *Handler) startGatewayLocked(initialStatus string) (int, error) {
 	// GetConfigPath() already reads, so the gateway sub-process uses the same
 	// config file without requiring a --config flag on the gateway subcommand.
 	if h.configPath != "" {
-		cmd.Env = append(cmd.Env, "PICOCLAW_CONFIG="+h.configPath)
+		cmd.Env = append(cmd.Env, "PERMACLAW_CONFIG="+h.configPath)
 	}
 	if host := h.gatewayHostOverride(); host != "" {
-		cmd.Env = append(cmd.Env, "PICOCLAW_GATEWAY_HOST="+host)
+		cmd.Env = append(cmd.Env, "PERMACLAW_GATEWAY_HOST="+host)
 	}
 
 	stdoutPipe, err := cmd.StdoutPipe()
@@ -294,7 +294,7 @@ func (h *Handler) startGatewayLocked(initialStatus string) (int, error) {
 	gateway.bootDefaultModel = defaultModelName
 	setGatewayRuntimeStatusLocked(initialStatus)
 	pid := cmd.Process.Pid
-	log.Printf("Started picoclaw gateway (PID: %d) from %s", pid, execPath)
+	log.Printf("Started permaclaw gateway (PID: %d) from %s", pid, execPath)
 
 	// Broadcast the launch state immediately so clients can reflect it without polling.
 	gateway.events.Broadcast(GatewayEvent{
@@ -382,9 +382,9 @@ func (h *Handler) startGatewayLocked(initialStatus string) (int, error) {
 	return pid, nil
 }
 
-// handleGatewayStart starts the picoclaw gateway subprocess.
+// handleGatewayStart starts the permaclaw gateway subprocess.
 //
-//	POST /api/gateway/start
+// POST /api/gateway/start
 func (h *Handler) handleGatewayStart(w http.ResponseWriter, r *http.Request) {
 	gateway.mu.Lock()
 	defer gateway.mu.Unlock()
@@ -438,7 +438,7 @@ func (h *Handler) handleGatewayStart(w http.ResponseWriter, r *http.Request) {
 
 // handleGatewayStop stops the running gateway subprocess gracefully.
 //
-//	POST /api/gateway/stop
+// POST /api/gateway/stop
 func (h *Handler) handleGatewayStop(w http.ResponseWriter, r *http.Request) {
 	gateway.mu.Lock()
 	defer gateway.mu.Unlock()
@@ -477,7 +477,7 @@ func (h *Handler) handleGatewayStop(w http.ResponseWriter, r *http.Request) {
 
 // handleGatewayRestart stops the gateway (if running) and starts a new instance.
 //
-//	POST /api/gateway/restart
+// POST /api/gateway/restart
 func (h *Handler) handleGatewayRestart(w http.ResponseWriter, r *http.Request) {
 	ready, reason, err := h.gatewayStartReady()
 	if err != nil {
@@ -549,7 +549,7 @@ func (h *Handler) handleGatewayRestart(w http.ResponseWriter, r *http.Request) {
 
 // handleGatewayClearLogs clears the in-memory gateway log buffer.
 //
-//	POST /api/gateway/logs/clear
+// POST /api/gateway/logs/clear
 func (h *Handler) handleGatewayClearLogs(w http.ResponseWriter, r *http.Request) {
 	gateway.logs.Clear()
 
@@ -563,7 +563,7 @@ func (h *Handler) handleGatewayClearLogs(w http.ResponseWriter, r *http.Request)
 
 // handleGatewayStatus returns the gateway run status and health info.
 //
-//	GET /api/gateway/status
+// GET /api/gateway/status
 func (h *Handler) handleGatewayStatus(w http.ResponseWriter, r *http.Request) {
 	data := h.gatewayStatusData()
 	w.Header().Set("Content-Type", "application/json")
@@ -667,7 +667,7 @@ func (h *Handler) gatewayStatusData() map[string]any {
 
 // handleGatewayLogs returns buffered gateway logs, optionally incrementally.
 //
-//	GET /api/gateway/logs
+// GET /api/gateway/logs
 func (h *Handler) handleGatewayLogs(w http.ResponseWriter, r *http.Request) {
 	data := gatewayLogsData(r)
 	w.Header().Set("Content-Type", "application/json")
@@ -721,7 +721,7 @@ func gatewayLogsData(r *http.Request) map[string]any {
 
 // handleGatewayEvents serves an SSE stream of gateway state change events.
 //
-//	GET /api/gateway/events
+// GET /api/gateway/events
 func (h *Handler) handleGatewayEvents(w http.ResponseWriter, r *http.Request) {
 	flusher, ok := w.(http.Flusher)
 	if !ok {

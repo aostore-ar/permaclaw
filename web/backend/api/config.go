@@ -6,7 +6,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/sipeed/picoclaw/pkg/config"
+	"github.com/aostore-ar/permaclaw/pkg/config"
 )
 
 // registerConfigRoutes binds configuration management endpoints to the ServeMux.
@@ -18,7 +18,7 @@ func (h *Handler) registerConfigRoutes(mux *http.ServeMux) {
 
 // handleGetConfig returns the complete system configuration.
 //
-//	GET /api/config
+// GET /api/config
 func (h *Handler) handleGetConfig(w http.ResponseWriter, r *http.Request) {
 	cfg, err := config.LoadConfig(h.configPath)
 	if err != nil {
@@ -34,7 +34,7 @@ func (h *Handler) handleGetConfig(w http.ResponseWriter, r *http.Request) {
 
 // handleUpdateConfig updates the complete system configuration.
 //
-//	PUT /api/config
+// PUT /api/config
 func (h *Handler) handleUpdateConfig(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(io.LimitReader(r.Body, 1<<20))
 	if err != nil {
@@ -88,7 +88,7 @@ func execAllowRemoteOmitted(body []byte) bool {
 // handlePatchConfig partially updates the system configuration using JSON Merge Patch (RFC 7396).
 // Only the fields present in the request body will be updated; all other fields remain unchanged.
 //
-//	PATCH /api/config
+// PATCH /api/config
 func (h *Handler) handlePatchConfig(w http.ResponseWriter, r *http.Request) {
 	patchBody, err := io.ReadAll(io.LimitReader(r.Body, 1<<20))
 	if err != nil {

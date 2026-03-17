@@ -1,3 +1,4 @@
+// backend/api/model_status.go
 package api
 
 import (
@@ -9,14 +10,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sipeed/picoclaw/pkg/config"
+	"github.com/aostore-ar/permaclaw/pkg/config"
 )
 
 const modelProbeTimeout = 800 * time.Millisecond
 
 var (
-	probeTCPServiceFunc            = probeTCPService
-	probeOllamaModelFunc           = probeOllamaModel
+	probeTCPServiceFunc          = probeTCPService
+	probeOllamaModelFunc         = probeOllamaModel
 	probeOpenAICompatibleModelFunc = probeOpenAICompatibleModel
 )
 

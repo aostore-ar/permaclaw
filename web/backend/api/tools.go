@@ -1,3 +1,4 @@
+// tools.go
 package api
 
 import (
@@ -6,7 +7,7 @@ import (
 	"net/http"
 	"runtime"
 
-	"github.com/sipeed/picoclaw/pkg/config"
+	"github.com/aostore-ar/permaclaw/pkg/config"
 )
 
 type toolCatalogEntry struct {

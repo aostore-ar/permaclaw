@@ -1,3 +1,4 @@
+// skills.go
 package api
 
 import (
@@ -10,8 +11,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/sipeed/picoclaw/pkg/config"
-	"github.com/sipeed/picoclaw/pkg/skills"
+	"github.com/aostore-ar/permaclaw/pkg/config"
+	"github.com/aostore-ar/permaclaw/pkg/skills"
 )
 
 type skillSupportResponse struct {
@@ -27,9 +28,9 @@ type skillDetailResponse struct {
 }
 
 var (
-	skillNameSanitizer       = regexp.MustCompile(`[^a-z0-9-]+`)
-	importedSkillFrontmatter = regexp.MustCompile(`(?s)^---(?:\r\n|\n|\r)(.*?)(?:\r\n|\n|\r)---(?:\r\n|\n|\r)*`)
-	skillFrontmatterStripper = regexp.MustCompile(`(?s)^---(?:\r\n|\n|\r)(.*?)(?:\r\n|\n|\r)---(?:\r\n|\n|\r)*`)
+	skillNameSanitizer         = regexp.MustCompile(`[^a-z0-9-]+`)
+	importedSkillFrontmatter   = regexp.MustCompile(`(?s)^---(?:\r\n|\n|\r)(.*?)(?:\r\n|\n|\r)---(?:\r\n|\n|\r)*`)
+	skillFrontmatterStripper   = regexp.MustCompile(`(?s)^---(?:\r\n|\n|\r)(.*?)(?:\r\n|\n|\r)---(?:\r\n|\n|\r)*`)
 )
 
 func (h *Handler) registerSkillRoutes(mux *http.ServeMux) {
@@ -97,7 +98,7 @@ func (h *Handler) handleImportSkill(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = r.ParseMultipartForm(2 << 20)
+	err = r.ParseMultipartForm(2 << 20) // 2 MB
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Invalid multipart form: %v", err), http.StatusBadRequest)
 		return
@@ -110,7 +111,7 @@ func (h *Handler) handleImportSkill(w http.ResponseWriter, r *http.Request) {
 	}
 	defer uploadedFile.Close()
 
-	content, err := io.ReadAll(io.LimitReader(uploadedFile, (1<<20)+1))
+	content, err := io.ReadAll(io.LimitReader(uploadedFile, 1<<20+1)) // 1 MB limit
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Failed to read file: %v", err), http.StatusBadRequest)
 		return
@@ -309,18 +310,18 @@ func loadSkillContent(path string) (string, error) {
 }
 
 func globalConfigDir() string {
-	if home := os.Getenv("PICOCLAW_HOME"); home != "" {
+	if home := os.Getenv("PERMACLAW_HOME"); home != "" {
 		return home
 	}
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return ""
 	}
-	return filepath.Join(home, ".picoclaw")
+	return filepath.Join(home, ".permaclaw")
 }
 
 func builtinSkillsDir() string {
-	if path := os.Getenv("PICOCLAW_BUILTIN_SKILLS"); path != "" {
+	if path := os.Getenv("PERMACLAW_BUILTIN_SKILLS"); path != "" {
 		return path
 	}
 	wd, err := os.Getwd()

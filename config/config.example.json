@@ -1,18 +1,37 @@
 {
   "wallet_path": "/home/user/.aos.json",
+  "main_process_id": "permaclaw-main-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
   "aostore": {
     "enabled": true,
     "process_id": "aoStore-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
     "ao_node_url": "https://ao.arweave.net"
   },
-  "aomem": {
-    "enabled": true,
-    "process_id": "user-memory-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-  },
-  "biocompute": {
-    "enabled": false,
-    "process_id": "",
-    "cl1_endpoint": "http://localhost:8080"
+  "processes": {
+    "memory": [
+      {
+        "id": "memory-personal-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "name": "personal",
+        "type": "memory",
+        "created_at": 1700000000,
+        "public": false
+      },
+      {
+        "id": "memory-work-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "name": "work",
+        "type": "memory",
+        "created_at": 1700000001,
+        "public": false
+      }
+    ],
+    "biocompute": [
+      {
+        "id": "biocompute-lab-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "name": "lab-rig",
+        "type": "biocompute",
+        "created_at": 1700000002,
+        "public": false
+      }
+    ]
   },
   "agents": {
     "defaults": {

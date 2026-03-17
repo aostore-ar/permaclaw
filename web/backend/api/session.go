@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sipeed/picoclaw/pkg/config"
-	"github.com/sipeed/picoclaw/pkg/providers"
+	"github.com/aostore-ar/permaclaw/pkg/config"
+	"github.com/aostore-ar/permaclaw/pkg/providers"
 )
 
 // registerSessionRoutes binds session list and detail endpoints to the ServeMux.
@@ -25,21 +25,21 @@ func (h *Handler) registerSessionRoutes(mux *http.ServeMux) {
 
 // sessionFile mirrors the on-disk session JSON structure from pkg/session.
 type sessionFile struct {
-	Key      string              `json:"key"`
-	Messages []providers.Message `json:"messages"`
-	Summary  string              `json:"summary,omitempty"`
-	Created  time.Time           `json:"created"`
-	Updated  time.Time           `json:"updated"`
+	Key      string               `json:"key"`
+	Messages []providers.Message  `json:"messages"`
+	Summary  string               `json:"summary,omitempty"`
+	Created  time.Time            `json:"created"`
+	Updated  time.Time            `json:"updated"`
 }
 
 // sessionListItem is a lightweight summary returned by GET /api/sessions.
 type sessionListItem struct {
-	ID           string `json:"id"`
-	Title        string `json:"title"`
-	Preview      string `json:"preview"`
-	MessageCount int    `json:"message_count"`
-	Created      string `json:"created"`
-	Updated      string `json:"updated"`
+	ID          string `json:"id"`
+	Title       string `json:"title"`
+	Preview     string `json:"preview"`
+	MessageCount int   `json:"message_count"`
+	Created     string `json:"created"`
+	Updated     string `json:"updated"`
 }
 
 type sessionMetaFile struct {
@@ -60,10 +60,10 @@ type sessionMetaFile struct {
 //
 //	agent_main_pico_direct_pico_<session-uuid>.json
 const (
-	picoSessionPrefix          = "agent:main:pico:direct:pico:"
-	sanitizedPicoSessionPrefix = "agent_main_pico_direct_pico_"
-	maxSessionJSONLLineSize    = 10 * 1024 * 1024 // 10 MB
-	maxSessionTitleRunes       = 60
+	picoSessionPrefix           = "agent:main:pico:direct:pico:"
+	sanitizedPicoSessionPrefix  = "agent_main_pico_direct_pico_"
+	maxSessionJSONLLineSize     = 10 * 1024 * 1024 // 10 MB
+	maxSessionTitleRunes        = 60
 )
 
 // extractPicoSessionID extracts the session UUID from a full session key.
@@ -248,7 +248,7 @@ func truncateRunes(s string, maxLen int) string {
 }
 
 // sessionsDir resolves the path to the gateway's session storage directory.
-// It reads the workspace from config, falling back to ~/.picoclaw/workspace.
+// It reads the workspace from config, falling back to ~/.permaclaw/workspace.
 func (h *Handler) sessionsDir() (string, error) {
 	cfg, err := config.LoadConfig(h.configPath)
 	if err != nil {
@@ -258,7 +258,7 @@ func (h *Handler) sessionsDir() (string, error) {
 	workspace := cfg.Agents.Defaults.Workspace
 	if workspace == "" {
 		home, _ := os.UserHomeDir()
-		workspace = filepath.Join(home, ".picoclaw", "workspace")
+		workspace = filepath.Join(home, ".permaclaw", "workspace")
 	}
 
 	// Expand ~ prefix
@@ -276,7 +276,7 @@ func (h *Handler) sessionsDir() (string, error) {
 
 // handleListSessions returns a list of Pico session summaries.
 //
-//	GET /api/sessions
+// GET /api/sessions
 func (h *Handler) handleListSessions(w http.ResponseWriter, r *http.Request) {
 	dir, err := h.sessionsDir()
 	if err != nil {
@@ -402,7 +402,7 @@ func (h *Handler) handleListSessions(w http.ResponseWriter, r *http.Request) {
 
 // handleGetSession returns the full message history for a specific session.
 //
-//	GET /api/sessions/{id}
+// GET /api/sessions/{id}
 func (h *Handler) handleGetSession(w http.ResponseWriter, r *http.Request) {
 	sessionID := r.PathValue("id")
 	if sessionID == "" {
@@ -466,7 +466,7 @@ func (h *Handler) handleGetSession(w http.ResponseWriter, r *http.Request) {
 
 // handleDeleteSession deletes a specific session.
 //
-//	DELETE /api/sessions/{id}
+// DELETE /api/sessions/{id}
 func (h *Handler) handleDeleteSession(w http.ResponseWriter, r *http.Request) {
 	sessionID := r.PathValue("id")
 	if sessionID == "" {

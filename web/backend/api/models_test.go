@@ -1,3 +1,4 @@
+// backend/api/models_test.go
 package api
 
 import (
@@ -8,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sipeed/picoclaw/pkg/auth"
-	"github.com/sipeed/picoclaw/pkg/config"
+	"github.com/aostore-ar/permaclaw/pkg/auth"
+	"github.com/aostore-ar/permaclaw/pkg/config"
 )
 
 func resetModelProbeHooks(t *testing.T) {

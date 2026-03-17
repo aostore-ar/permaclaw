@@ -1,3 +1,4 @@
+// skills_test.go
 package api
 
 import (
@@ -11,7 +12,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/sipeed/picoclaw/pkg/config"
+	"github.com/aostore-ar/permaclaw/pkg/config"
 )
 
 func TestHandleListSkills(t *testing.T) {
@@ -30,6 +31,7 @@ func TestHandleListSkills(t *testing.T) {
 		t.Fatalf("SaveConfig() error = %v", err)
 	}
 
+	// Create workspace skill
 	if err := os.MkdirAll(filepath.Join(workspace, "skills", "workspace-skill"), 0o755); err != nil {
 		t.Fatalf("MkdirAll(workspace skill) error = %v", err)
 	}
@@ -41,6 +43,7 @@ func TestHandleListSkills(t *testing.T) {
 		t.Fatalf("WriteFile(workspace skill) error = %v", err)
 	}
 
+	// Create global skill
 	globalSkillDir := filepath.Join(globalConfigDir(), "skills", "global-skill")
 	if err := os.MkdirAll(globalSkillDir, 0o755); err != nil {
 		t.Fatalf("MkdirAll(global skill) error = %v", err)
@@ -53,16 +56,17 @@ func TestHandleListSkills(t *testing.T) {
 		t.Fatalf("WriteFile(global skill) error = %v", err)
 	}
 
+	// Create builtin skill
 	builtinRoot := filepath.Join(t.TempDir(), "builtin-skills")
-	oldBuiltin := os.Getenv("PICOCLAW_BUILTIN_SKILLS")
-	if err := os.Setenv("PICOCLAW_BUILTIN_SKILLS", builtinRoot); err != nil {
-		t.Fatalf("Setenv(PICOCLAW_BUILTIN_SKILLS) error = %v", err)
+	oldBuiltin := os.Getenv("PERMACLAW_BUILTIN_SKILLS")
+	if err := os.Setenv("PERMACLAW_BUILTIN_SKILLS", builtinRoot); err != nil {
+		t.Fatalf("Setenv(PERMACLAW_BUILTIN_SKILLS) error = %v", err)
 	}
 	defer func() {
 		if oldBuiltin == "" {
-			_ = os.Unsetenv("PICOCLAW_BUILTIN_SKILLS")
+			_ = os.Unsetenv("PERMACLAW_BUILTIN_SKILLS")
 		} else {
-			_ = os.Setenv("PICOCLAW_BUILTIN_SKILLS", oldBuiltin)
+			_ = os.Setenv("PERMACLAW_BUILTIN_SKILLS", oldBuiltin)
 		}
 	}()
 

@@ -8,10 +8,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/sipeed/picoclaw/pkg/config"
-	"github.com/sipeed/picoclaw/pkg/memory"
-	"github.com/sipeed/picoclaw/pkg/providers"
-	"github.com/sipeed/picoclaw/pkg/session"
+	"github.com/aostore-ar/permaclaw/pkg/config"
+	"github.com/aostore-ar/permaclaw/pkg/memory"
+	"github.com/aostore-ar/permaclaw/pkg/providers"
+	"github.com/aostore-ar/permaclaw/pkg/session"
 )
 
 func sessionsTestDir(t *testing.T, configPath string) string {
@@ -115,7 +115,7 @@ func TestHandleListSessions_TitleUsesTrimmedSummary(t *testing.T) {
 	if err := store.SetSummary(
 		nil,
 		sessionKey,
-		"  This summary is intentionally longer than sixty characters so it must be truncated in the history menu.  ",
+		" This summary is intentionally longer than sixty characters so it must be truncated in the history menu. ",
 	); err != nil {
 		t.Fatalf("SetSummary() error = %v", err)
 	}
@@ -188,8 +188,8 @@ func TestHandleGetSession_JSONLStorage(t *testing.T) {
 	}
 
 	var resp struct {
-		ID       string `json:"id"`
-		Summary  string `json:"summary"`
+		ID      string `json:"id"`
+		Summary string `json:"summary"`
 		Messages []struct {
 			Role    string `json:"role"`
 			Content string `json:"content"`

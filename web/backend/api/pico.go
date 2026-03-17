@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/sipeed/picoclaw/pkg/config"
+	"github.com/aostore-ar/permaclaw/pkg/config"
 )
 
 // registerPicoRoutes binds Pico Channel management endpoints to the ServeMux.
@@ -20,7 +20,7 @@ func (h *Handler) registerPicoRoutes(mux *http.ServeMux) {
 
 // handleGetPicoToken returns the current WS token and URL for the frontend.
 //
-//	GET /api/pico/token
+// GET /api/pico/token
 func (h *Handler) handleGetPicoToken(w http.ResponseWriter, r *http.Request) {
 	cfg, err := config.LoadConfig(h.configPath)
 	if err != nil {
@@ -40,7 +40,7 @@ func (h *Handler) handleGetPicoToken(w http.ResponseWriter, r *http.Request) {
 
 // handleRegenPicoToken generates a new Pico WebSocket token and saves it.
 //
-//	POST /api/pico/token
+// POST /api/pico/token
 func (h *Handler) handleRegenPicoToken(w http.ResponseWriter, r *http.Request) {
 	cfg, err := config.LoadConfig(h.configPath)
 	if err != nil {
@@ -107,7 +107,7 @@ func (h *Handler) ensurePicoChannel(callerOrigin string) (bool, error) {
 
 // handlePicoSetup automatically configures everything needed for the Pico Channel to work.
 //
-//	POST /api/pico/setup
+// POST /api/pico/setup
 func (h *Handler) handlePicoSetup(w http.ResponseWriter, r *http.Request) {
 	changed, err := h.ensurePicoChannel(r.Header.Get("Origin"))
 	if err != nil {
