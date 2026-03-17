@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=PermaClaw Launcher
+Comment=Web-based configuration and management UI for PermaClaw – your immortal AI assistant
+Exec=permaclaw-launcher
+Icon=permaclaw-launcher
+Terminal=true
+Type=Application
+Categories=Utility;Network;
+Keywords=permaclaw;ai;agent;bot;permanent;memory;
