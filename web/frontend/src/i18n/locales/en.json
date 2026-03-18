@@ -1,0 +1,25 @@
+{
+  "navigation": {
+    "chat": "Chat",
+    "models": "Models",
+    "credentials": "Credentials",
+    "agent": "Agent",
+    "skills": "Skills",
+    "tools": "Tools",
+    "services": "Services",
+    "config": "Config",
+    "logs": "Logs",
+    "channels_group": "Channels",
+    "show_less_channels": "Show less",
+    "show_more_channels": "Show more"
+  },
+  "store": "aoStore",
+  "store.catalog": "Catalog",
+  "store.ads": "Ads",
+  "store.dapps": "DApps",
+  "store.staking": "Staking",
+  "permanent": "Permanent",
+  "permanent.memory": "Memory",
+  "permanent.biocompute": "BioCompute",
+  "permanent.processes": "Processes"
+}

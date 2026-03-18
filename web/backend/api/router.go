@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/aostore-ar/permaclaw/web/backend/api/store"
 	"github.com/aostore-ar/permaclaw/web/backend/launcherconfig"
 )
 
@@ -71,8 +72,8 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	h.registerLauncherConfigRoutes(mux)
 
 	// === PermaClaw‑specific routes ===
-	// aoStore product listing and installation
-	h.registerStoreRoutes(mux)
+	// aoStore (full functionality: catalog, ads, dapps, staking)
+	store.NewHandler(h.configPath).RegisterRoutes(mux)
 
 	// Permanent memory operations (store, retrieve, list, recover)
 	h.registerMemoryRoutes(mux)
@@ -82,13 +83,6 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 
 	// Process management (list, spawn, delete processes)
 	h.registerProcessesRoutes(mux)
-}
-
-// registerStoreRoutes binds aoStore endpoints to the ServeMux.
-func (h *Handler) registerStoreRoutes(mux *http.ServeMux) {
-	mux.HandleFunc("GET /api/store/products", h.handleListProducts)
-	mux.HandleFunc("GET /api/store/products/{id}", h.handleGetProduct)
-	mux.HandleFunc("POST /api/store/install", h.handleInstallProduct)
 }
 
 // registerMemoryRoutes binds permanent memory endpoints.

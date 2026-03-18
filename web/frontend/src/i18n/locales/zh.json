@@ -1,0 +1,25 @@
+{
+  "navigation": {
+    "chat": "聊天",
+    "models": "模型",
+    "credentials": "凭证",
+    "agent": "代理",
+    "skills": "技能",
+    "tools": "工具",
+    "services": "服务",
+    "config": "配置",
+    "logs": "日志",
+    "channels_group": "频道",
+    "show_less_channels": "收起",
+    "show_more_channels": "展开"
+  },
+  "store": "aoStore",
+  "store.catalog": "产品目录",
+  "store.ads": "广告",
+  "store.dapps": "DApps",
+  "store.staking": "质押",
+  "permanent": "永久",
+  "permanent.memory": "记忆",
+  "permanent.biocompute": "生物计算",
+  "permanent.processes": "进程"
+}
