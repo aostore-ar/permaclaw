@@ -1,0 +1,79 @@
+{
+  "owner": {
+    "id": "owner1",
+    "name": "Alice",
+    "totalEarnings": 2070,
+    "totalSubscribers": 73,
+    "totalImpressions": 21200
+  },
+  "dapps": [
+    {
+      "id": "1",
+      "name": "DeFi Swap",
+      "description": "Decentralized exchange on AO with low fees and fast transactions.",
+      "category": "DeFi",
+      "product_type": "Website DApp",
+      "earnings": 1250,
+      "subscribers": 45,
+      "impressions": 12300,
+      "clicks": 456,
+      "dailyStats": [
+        { "date": "2025-03-10", "impressions": 2100, "clicks": 78, "earnings": 180 },
+        { "date": "2025-03-11", "impressions": 1900, "clicks": 65, "earnings": 160 },
+        { "date": "2025-03-12", "impressions": 2300, "clicks": 92, "earnings": 200 },
+        { "date": "2025-03-13", "impressions": 2500, "clicks": 110, "earnings": 230 },
+        { "date": "2025-03-14", "impressions": 2800, "clicks": 125, "earnings": 260 },
+        { "date": "2025-03-15", "impressions": 2600, "clicks": 115, "earnings": 240 },
+        { "date": "2025-03-16", "impressions": 2100, "clicks": 89, "earnings": 190 }
+      ],
+      "reviews": [
+        {
+          "id": "r1",
+          "user": "0xabc...123",
+          "rating": 5,
+          "comment": "Great DEX, very smooth!",
+          "date": "2025-02-15T10:30:00Z",
+          "reply": null
+        },
+        {
+          "id": "r2",
+          "user": "0xdef...456",
+          "rating": 4,
+          "comment": "Works well, but could use more liquidity pairs.",
+          "date": "2025-02-20T14:20:00Z",
+          "reply": "Thanks for the feedback! We're adding more pairs next week."
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "name": "Crypto Wallet",
+      "description": "Secure wallet for AO tokens.",
+      "category": "Wallet",
+      "product_type": "Mobile DApp",
+      "earnings": 820,
+      "subscribers": 28,
+      "impressions": 8900,
+      "clicks": 312,
+      "dailyStats": [
+        { "date": "2025-03-10", "impressions": 1200, "clicks": 42, "earnings": 100 },
+        { "date": "2025-03-11", "impressions": 1350, "clicks": 48, "earnings": 115 },
+        { "date": "2025-03-12", "impressions": 1400, "clicks": 51, "earnings": 120 },
+        { "date": "2025-03-13", "impressions": 1500, "clicks": 55, "earnings": 130 },
+        { "date": "2025-03-14", "impressions": 1600, "clicks": 60, "earnings": 140 },
+        { "date": "2025-03-15", "impressions": 1450, "clicks": 52, "earnings": 125 },
+        { "date": "2025-03-16", "impressions": 1300, "clicks": 45, "earnings": 110 }
+      ],
+      "reviews": [
+        {
+          "id": "r3",
+          "user": "0xghi...789",
+          "rating": 5,
+          "comment": "Best wallet on AO!",
+          "date": "2025-02-18T09:15:00Z",
+          "reply": "Thank you!"
+        }
+      ]
+    }
+  ]
+}

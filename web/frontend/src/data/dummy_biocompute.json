@@ -1,0 +1,143 @@
+[
+  {
+    "id": "bio1",
+    "name": "Neuron Culture #42",
+    "type": "biocompute",
+    "public": true,
+    "tokenGate": null,
+    "created_at": 1700020000000,
+    "spikes": [
+      { "id": "s101", "timestamp": 1700021000000, "channel": 1, "amplitude": 0.8, "experiment": "baseline" },
+      { "id": "s102", "timestamp": 1700021100000, "channel": 2, "amplitude": 1.2, "experiment": "stimulus" },
+      { "id": "s103", "timestamp": 1700021200000, "channel": 1, "amplitude": 1.5, "experiment": "stimulus" },
+      { "id": "s104", "timestamp": 1700021300000, "channel": 3, "amplitude": 0.5, "experiment": "baseline" }
+    ],
+    "memories": [
+      {
+        "id": "m101",
+        "content": "Baseline activity stable, noise floor at 0.3µV.",
+        "type": "note",
+        "importance": 0.6,
+        "timestamp": 1700021400000
+      }
+    ]
+  },
+  {
+    "id": "bio2",
+    "name": "Stimulation Response",
+    "type": "biocompute",
+    "public": true,
+    "tokenGate": {
+      "enabled": true,
+      "tokenId": "AOS",
+      "minAmount": 200
+    },
+    "created_at": 1700030000000,
+    "spikes": [
+      { "id": "s201", "timestamp": 1700031000000, "channel": 4, "amplitude": 2.1, "experiment": "test1" },
+      { "id": "s202", "timestamp": 1700031100000, "channel": 4, "amplitude": 1.9, "experiment": "test1" },
+      { "id": "s203", "timestamp": 1700031200000, "channel": 5, "amplitude": 1.7, "experiment": "test2" }
+    ],
+    "memories": [
+      {
+        "id": "m201",
+        "content": "Stimulation at 50Hz produced strong response on channel 4.",
+        "type": "observation",
+        "importance": 0.8,
+        "timestamp": 1700031300000
+      }
+    ]
+  },
+  {
+    "id": "bio3",
+    "name": "Long‑term Potentiation Study",
+    "type": "biocompute",
+    "public": true,
+    "tokenGate": {
+      "enabled": true,
+      "tokenId": "AOS",
+      "minAmount": 500
+    },
+    "created_at": 1700040000000,
+    "spikes": [
+      { "id": "s301", "timestamp": 1700041000000, "channel": 2, "amplitude": 2.5, "experiment": "LTP" },
+      { "id": "s302", "timestamp": 1700041100000, "channel": 2, "amplitude": 2.3, "experiment": "LTP" },
+      { "id": "s303", "timestamp": 1700041200000, "channel": 6, "amplitude": 1.1, "experiment": "control" }
+    ],
+    "memories": [
+      {
+        "id": "m301",
+        "content": "LTP induced on channel 2, sustained potentiation observed.",
+        "type": "conclusion",
+        "importance": 0.9,
+        "timestamp": 1700041300000
+      }
+    ]
+  },
+  {
+    "id": "bio4",
+    "name": "Drug Trial – Compound X",
+    "type": "biocompute",
+    "public": false,
+    "tokenGate": null,
+    "created_at": 1700050000000,
+    "spikes": [
+      { "id": "s401", "timestamp": 1700051000000, "channel": 3, "amplitude": 1.8, "experiment": "pre‑dose" },
+      { "id": "s402", "timestamp": 1700051100000, "channel": 3, "amplitude": 1.2, "experiment": "post‑dose" },
+      { "id": "s403", "timestamp": 1700051200000, "channel": 7, "amplitude": 0.9, "experiment": "post‑dose" }
+    ],
+    "memories": [
+      {
+        "id": "m401",
+        "content": "Compound X reduced spike amplitude by 33% on channel 3.",
+        "type": "result",
+        "importance": 0.85,
+        "timestamp": 1700051300000
+      }
+    ]
+  },
+  {
+    "id": "bio5",
+    "name": "Public Dataset – Allen Brain Observatory",
+    "type": "biocompute",
+    "public": true,
+    "tokenGate": null,
+    "created_at": 1700060000000,
+    "spikes": [
+      { "id": "s501", "timestamp": 1700061000000, "channel": 1, "amplitude": 0.6, "experiment": "visual" },
+      { "id": "s502", "timestamp": 1700061100000, "channel": 2, "amplitude": 0.9, "experiment": "visual" },
+      { "id": "s503", "timestamp": 1700061200000, "channel": 1, "amplitude": 1.3, "experiment": "spontaneous" },
+      { "id": "s504", "timestamp": 1700061300000, "channel": 3, "amplitude": 0.7, "experiment": "spontaneous" }
+    ],
+    "memories": [
+      {
+        "id": "m501",
+        "content": "Public dataset imported; includes recordings from visual cortex.",
+        "type": "info",
+        "importance": 0.5,
+        "timestamp": 1700061400000
+      }
+    ]
+  },
+  {
+    "id": "bio6",
+    "name": "Closed‑Loop Stimulation",
+    "type": "biocompute",
+    "public": false,
+    "tokenGate": null,
+    "created_at": 1700070000000,
+    "spikes": [
+      { "id": "s601", "timestamp": 1700071000000, "channel": 8, "amplitude": 1.8, "experiment": "feedback" },
+      { "id": "s602", "timestamp": 1700071100000, "channel": 8, "amplitude": 2.2, "experiment": "feedback" }
+    ],
+    "memories": [
+      {
+        "id": "m601",
+        "content": "Closed‑loop algorithm successfully reduced aberrant spikes.",
+        "type": "result",
+        "importance": 0.95,
+        "timestamp": 1700071200000
+      }
+    ]
+  }
+]

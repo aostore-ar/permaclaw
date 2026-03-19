@@ -17,10 +17,29 @@ import { Route as AgentRouteImport } from './routes/agent'
 import { Route as ChannelsRouteRouteImport } from './routes/channels/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as StoreIndexRouteImport } from './routes/store/index'
+import { Route as MemoryIndexRouteImport } from './routes/memory/index'
+import { Route as BiocomputeIndexRouteImport } from './routes/biocompute/index'
+import { Route as StoreCreateRouteImport } from './routes/store/create'
+import { Route as StoreIdRouteImport } from './routes/store/$id'
+import { Route as MemorySpawnRouteImport } from './routes/memory/spawn'
+import { Route as MemoryRecoverRouteImport } from './routes/memory/recover'
+import { Route as MemoryMyRouteImport } from './routes/memory/my'
+import { Route as MemoryMemoryIdRouteImport } from './routes/memory/$memoryId'
 import { Route as ConfigRawRouteImport } from './routes/config.raw'
 import { Route as ChannelsNameRouteImport } from './routes/channels/$name'
+import { Route as BiocomputeSpawnRouteImport } from './routes/biocompute/spawn'
+import { Route as BiocomputeMyRouteImport } from './routes/biocompute/my'
 import { Route as AgentToolsRouteImport } from './routes/agent/tools'
 import { Route as AgentSkillsRouteImport } from './routes/agent/skills'
+import { Route as StoreStakingIndexRouteImport } from './routes/store/staking/index'
+import { Route as StoreDappsIndexRouteImport } from './routes/store/dapps/index'
+import { Route as StoreAdsIndexRouteImport } from './routes/store/ads/index'
+import { Route as StoreStakingUserRouteImport } from './routes/store/staking/user'
+import { Route as StoreAdsCreateRouteImport } from './routes/store/ads/create'
+import { Route as StoreAdsIdRouteImport } from './routes/store/ads/$id'
+import { Route as MemoryProcessProcessIdRouteImport } from './routes/memory/process/$processId'
+import { Route as BiocomputeProcessProcessIdRouteImport } from './routes/biocompute/process/$processId'
+import { Route as MemoryProcessProcessIdEditRouteImport } from './routes/memory/process/$processId/edit'
 
 const ModelsRoute = ModelsRouteImport.update({
   id: '/models',
@@ -62,6 +81,46 @@ const StoreIndexRoute = StoreIndexRouteImport.update({
   path: '/store/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MemoryIndexRoute = MemoryIndexRouteImport.update({
+  id: '/memory/',
+  path: '/memory/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BiocomputeIndexRoute = BiocomputeIndexRouteImport.update({
+  id: '/biocompute/',
+  path: '/biocompute/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StoreCreateRoute = StoreCreateRouteImport.update({
+  id: '/store/create',
+  path: '/store/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StoreIdRoute = StoreIdRouteImport.update({
+  id: '/store/$id',
+  path: '/store/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MemorySpawnRoute = MemorySpawnRouteImport.update({
+  id: '/memory/spawn',
+  path: '/memory/spawn',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MemoryRecoverRoute = MemoryRecoverRouteImport.update({
+  id: '/memory/recover',
+  path: '/memory/recover',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MemoryMyRoute = MemoryMyRouteImport.update({
+  id: '/memory/my',
+  path: '/memory/my',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MemoryMemoryIdRoute = MemoryMemoryIdRouteImport.update({
+  id: '/memory/$memoryId',
+  path: '/memory/$memoryId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConfigRawRoute = ConfigRawRouteImport.update({
   id: '/raw',
   path: '/raw',
@@ -71,6 +130,16 @@ const ChannelsNameRoute = ChannelsNameRouteImport.update({
   id: '/$name',
   path: '/$name',
   getParentRoute: () => ChannelsRouteRoute,
+} as any)
+const BiocomputeSpawnRoute = BiocomputeSpawnRouteImport.update({
+  id: '/biocompute/spawn',
+  path: '/biocompute/spawn',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BiocomputeMyRoute = BiocomputeMyRouteImport.update({
+  id: '/biocompute/my',
+  path: '/biocompute/my',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AgentToolsRoute = AgentToolsRouteImport.update({
   id: '/tools',
@@ -82,6 +151,53 @@ const AgentSkillsRoute = AgentSkillsRouteImport.update({
   path: '/skills',
   getParentRoute: () => AgentRoute,
 } as any)
+const StoreStakingIndexRoute = StoreStakingIndexRouteImport.update({
+  id: '/store/staking/',
+  path: '/store/staking/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StoreDappsIndexRoute = StoreDappsIndexRouteImport.update({
+  id: '/store/dapps/',
+  path: '/store/dapps/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StoreAdsIndexRoute = StoreAdsIndexRouteImport.update({
+  id: '/store/ads/',
+  path: '/store/ads/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StoreStakingUserRoute = StoreStakingUserRouteImport.update({
+  id: '/store/staking/user',
+  path: '/store/staking/user',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StoreAdsCreateRoute = StoreAdsCreateRouteImport.update({
+  id: '/store/ads/create',
+  path: '/store/ads/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StoreAdsIdRoute = StoreAdsIdRouteImport.update({
+  id: '/store/ads/$id',
+  path: '/store/ads/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MemoryProcessProcessIdRoute = MemoryProcessProcessIdRouteImport.update({
+  id: '/memory/process/$processId',
+  path: '/memory/process/$processId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BiocomputeProcessProcessIdRoute =
+  BiocomputeProcessProcessIdRouteImport.update({
+    id: '/biocompute/process/$processId',
+    path: '/biocompute/process/$processId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const MemoryProcessProcessIdEditRoute =
+  MemoryProcessProcessIdEditRouteImport.update({
+    id: '/edit',
+    path: '/edit',
+    getParentRoute: () => MemoryProcessProcessIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -93,9 +209,28 @@ export interface FileRoutesByFullPath {
   '/models': typeof ModelsRoute
   '/agent/skills': typeof AgentSkillsRoute
   '/agent/tools': typeof AgentToolsRoute
+  '/biocompute/my': typeof BiocomputeMyRoute
+  '/biocompute/spawn': typeof BiocomputeSpawnRoute
   '/channels/$name': typeof ChannelsNameRoute
   '/config/raw': typeof ConfigRawRoute
+  '/memory/$memoryId': typeof MemoryMemoryIdRoute
+  '/memory/my': typeof MemoryMyRoute
+  '/memory/recover': typeof MemoryRecoverRoute
+  '/memory/spawn': typeof MemorySpawnRoute
+  '/store/$id': typeof StoreIdRoute
+  '/store/create': typeof StoreCreateRoute
+  '/biocompute/': typeof BiocomputeIndexRoute
+  '/memory/': typeof MemoryIndexRoute
   '/store/': typeof StoreIndexRoute
+  '/biocompute/process/$processId': typeof BiocomputeProcessProcessIdRoute
+  '/memory/process/$processId': typeof MemoryProcessProcessIdRouteWithChildren
+  '/store/ads/$id': typeof StoreAdsIdRoute
+  '/store/ads/create': typeof StoreAdsCreateRoute
+  '/store/staking/user': typeof StoreStakingUserRoute
+  '/store/ads/': typeof StoreAdsIndexRoute
+  '/store/dapps/': typeof StoreDappsIndexRoute
+  '/store/staking/': typeof StoreStakingIndexRoute
+  '/memory/process/$processId/edit': typeof MemoryProcessProcessIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -107,9 +242,28 @@ export interface FileRoutesByTo {
   '/models': typeof ModelsRoute
   '/agent/skills': typeof AgentSkillsRoute
   '/agent/tools': typeof AgentToolsRoute
+  '/biocompute/my': typeof BiocomputeMyRoute
+  '/biocompute/spawn': typeof BiocomputeSpawnRoute
   '/channels/$name': typeof ChannelsNameRoute
   '/config/raw': typeof ConfigRawRoute
+  '/memory/$memoryId': typeof MemoryMemoryIdRoute
+  '/memory/my': typeof MemoryMyRoute
+  '/memory/recover': typeof MemoryRecoverRoute
+  '/memory/spawn': typeof MemorySpawnRoute
+  '/store/$id': typeof StoreIdRoute
+  '/store/create': typeof StoreCreateRoute
+  '/biocompute': typeof BiocomputeIndexRoute
+  '/memory': typeof MemoryIndexRoute
   '/store': typeof StoreIndexRoute
+  '/biocompute/process/$processId': typeof BiocomputeProcessProcessIdRoute
+  '/memory/process/$processId': typeof MemoryProcessProcessIdRouteWithChildren
+  '/store/ads/$id': typeof StoreAdsIdRoute
+  '/store/ads/create': typeof StoreAdsCreateRoute
+  '/store/staking/user': typeof StoreStakingUserRoute
+  '/store/ads': typeof StoreAdsIndexRoute
+  '/store/dapps': typeof StoreDappsIndexRoute
+  '/store/staking': typeof StoreStakingIndexRoute
+  '/memory/process/$processId/edit': typeof MemoryProcessProcessIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -122,9 +276,28 @@ export interface FileRoutesById {
   '/models': typeof ModelsRoute
   '/agent/skills': typeof AgentSkillsRoute
   '/agent/tools': typeof AgentToolsRoute
+  '/biocompute/my': typeof BiocomputeMyRoute
+  '/biocompute/spawn': typeof BiocomputeSpawnRoute
   '/channels/$name': typeof ChannelsNameRoute
   '/config/raw': typeof ConfigRawRoute
+  '/memory/$memoryId': typeof MemoryMemoryIdRoute
+  '/memory/my': typeof MemoryMyRoute
+  '/memory/recover': typeof MemoryRecoverRoute
+  '/memory/spawn': typeof MemorySpawnRoute
+  '/store/$id': typeof StoreIdRoute
+  '/store/create': typeof StoreCreateRoute
+  '/biocompute/': typeof BiocomputeIndexRoute
+  '/memory/': typeof MemoryIndexRoute
   '/store/': typeof StoreIndexRoute
+  '/biocompute/process/$processId': typeof BiocomputeProcessProcessIdRoute
+  '/memory/process/$processId': typeof MemoryProcessProcessIdRouteWithChildren
+  '/store/ads/$id': typeof StoreAdsIdRoute
+  '/store/ads/create': typeof StoreAdsCreateRoute
+  '/store/staking/user': typeof StoreStakingUserRoute
+  '/store/ads/': typeof StoreAdsIndexRoute
+  '/store/dapps/': typeof StoreDappsIndexRoute
+  '/store/staking/': typeof StoreStakingIndexRoute
+  '/memory/process/$processId/edit': typeof MemoryProcessProcessIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -138,9 +311,28 @@ export interface FileRouteTypes {
     | '/models'
     | '/agent/skills'
     | '/agent/tools'
+    | '/biocompute/my'
+    | '/biocompute/spawn'
     | '/channels/$name'
     | '/config/raw'
+    | '/memory/$memoryId'
+    | '/memory/my'
+    | '/memory/recover'
+    | '/memory/spawn'
+    | '/store/$id'
+    | '/store/create'
+    | '/biocompute/'
+    | '/memory/'
     | '/store/'
+    | '/biocompute/process/$processId'
+    | '/memory/process/$processId'
+    | '/store/ads/$id'
+    | '/store/ads/create'
+    | '/store/staking/user'
+    | '/store/ads/'
+    | '/store/dapps/'
+    | '/store/staking/'
+    | '/memory/process/$processId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -152,9 +344,28 @@ export interface FileRouteTypes {
     | '/models'
     | '/agent/skills'
     | '/agent/tools'
+    | '/biocompute/my'
+    | '/biocompute/spawn'
     | '/channels/$name'
     | '/config/raw'
+    | '/memory/$memoryId'
+    | '/memory/my'
+    | '/memory/recover'
+    | '/memory/spawn'
+    | '/store/$id'
+    | '/store/create'
+    | '/biocompute'
+    | '/memory'
     | '/store'
+    | '/biocompute/process/$processId'
+    | '/memory/process/$processId'
+    | '/store/ads/$id'
+    | '/store/ads/create'
+    | '/store/staking/user'
+    | '/store/ads'
+    | '/store/dapps'
+    | '/store/staking'
+    | '/memory/process/$processId/edit'
   id:
     | '__root__'
     | '/'
@@ -166,9 +377,28 @@ export interface FileRouteTypes {
     | '/models'
     | '/agent/skills'
     | '/agent/tools'
+    | '/biocompute/my'
+    | '/biocompute/spawn'
     | '/channels/$name'
     | '/config/raw'
+    | '/memory/$memoryId'
+    | '/memory/my'
+    | '/memory/recover'
+    | '/memory/spawn'
+    | '/store/$id'
+    | '/store/create'
+    | '/biocompute/'
+    | '/memory/'
     | '/store/'
+    | '/biocompute/process/$processId'
+    | '/memory/process/$processId'
+    | '/store/ads/$id'
+    | '/store/ads/create'
+    | '/store/staking/user'
+    | '/store/ads/'
+    | '/store/dapps/'
+    | '/store/staking/'
+    | '/memory/process/$processId/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -179,7 +409,25 @@ export interface RootRouteChildren {
   CredentialsRoute: typeof CredentialsRoute
   LogsRoute: typeof LogsRoute
   ModelsRoute: typeof ModelsRoute
+  BiocomputeMyRoute: typeof BiocomputeMyRoute
+  BiocomputeSpawnRoute: typeof BiocomputeSpawnRoute
+  MemoryMemoryIdRoute: typeof MemoryMemoryIdRoute
+  MemoryMyRoute: typeof MemoryMyRoute
+  MemoryRecoverRoute: typeof MemoryRecoverRoute
+  MemorySpawnRoute: typeof MemorySpawnRoute
+  StoreIdRoute: typeof StoreIdRoute
+  StoreCreateRoute: typeof StoreCreateRoute
+  BiocomputeIndexRoute: typeof BiocomputeIndexRoute
+  MemoryIndexRoute: typeof MemoryIndexRoute
   StoreIndexRoute: typeof StoreIndexRoute
+  BiocomputeProcessProcessIdRoute: typeof BiocomputeProcessProcessIdRoute
+  MemoryProcessProcessIdRoute: typeof MemoryProcessProcessIdRouteWithChildren
+  StoreAdsIdRoute: typeof StoreAdsIdRoute
+  StoreAdsCreateRoute: typeof StoreAdsCreateRoute
+  StoreStakingUserRoute: typeof StoreStakingUserRoute
+  StoreAdsIndexRoute: typeof StoreAdsIndexRoute
+  StoreDappsIndexRoute: typeof StoreDappsIndexRoute
+  StoreStakingIndexRoute: typeof StoreStakingIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -240,6 +488,62 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StoreIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/memory/': {
+      id: '/memory/'
+      path: '/memory'
+      fullPath: '/memory/'
+      preLoaderRoute: typeof MemoryIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/biocompute/': {
+      id: '/biocompute/'
+      path: '/biocompute'
+      fullPath: '/biocompute/'
+      preLoaderRoute: typeof BiocomputeIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/store/create': {
+      id: '/store/create'
+      path: '/store/create'
+      fullPath: '/store/create'
+      preLoaderRoute: typeof StoreCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/store/$id': {
+      id: '/store/$id'
+      path: '/store/$id'
+      fullPath: '/store/$id'
+      preLoaderRoute: typeof StoreIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/memory/spawn': {
+      id: '/memory/spawn'
+      path: '/memory/spawn'
+      fullPath: '/memory/spawn'
+      preLoaderRoute: typeof MemorySpawnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/memory/recover': {
+      id: '/memory/recover'
+      path: '/memory/recover'
+      fullPath: '/memory/recover'
+      preLoaderRoute: typeof MemoryRecoverRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/memory/my': {
+      id: '/memory/my'
+      path: '/memory/my'
+      fullPath: '/memory/my'
+      preLoaderRoute: typeof MemoryMyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/memory/$memoryId': {
+      id: '/memory/$memoryId'
+      path: '/memory/$memoryId'
+      fullPath: '/memory/$memoryId'
+      preLoaderRoute: typeof MemoryMemoryIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/config/raw': {
       id: '/config/raw'
       path: '/raw'
@@ -254,6 +558,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChannelsNameRouteImport
       parentRoute: typeof ChannelsRouteRoute
     }
+    '/biocompute/spawn': {
+      id: '/biocompute/spawn'
+      path: '/biocompute/spawn'
+      fullPath: '/biocompute/spawn'
+      preLoaderRoute: typeof BiocomputeSpawnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/biocompute/my': {
+      id: '/biocompute/my'
+      path: '/biocompute/my'
+      fullPath: '/biocompute/my'
+      preLoaderRoute: typeof BiocomputeMyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/agent/tools': {
       id: '/agent/tools'
       path: '/tools'
@@ -267,6 +585,69 @@ declare module '@tanstack/react-router' {
       fullPath: '/agent/skills'
       preLoaderRoute: typeof AgentSkillsRouteImport
       parentRoute: typeof AgentRoute
+    }
+    '/store/staking/': {
+      id: '/store/staking/'
+      path: '/store/staking'
+      fullPath: '/store/staking/'
+      preLoaderRoute: typeof StoreStakingIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/store/dapps/': {
+      id: '/store/dapps/'
+      path: '/store/dapps'
+      fullPath: '/store/dapps/'
+      preLoaderRoute: typeof StoreDappsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/store/ads/': {
+      id: '/store/ads/'
+      path: '/store/ads'
+      fullPath: '/store/ads/'
+      preLoaderRoute: typeof StoreAdsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/store/staking/user': {
+      id: '/store/staking/user'
+      path: '/store/staking/user'
+      fullPath: '/store/staking/user'
+      preLoaderRoute: typeof StoreStakingUserRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/store/ads/create': {
+      id: '/store/ads/create'
+      path: '/store/ads/create'
+      fullPath: '/store/ads/create'
+      preLoaderRoute: typeof StoreAdsCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/store/ads/$id': {
+      id: '/store/ads/$id'
+      path: '/store/ads/$id'
+      fullPath: '/store/ads/$id'
+      preLoaderRoute: typeof StoreAdsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/memory/process/$processId': {
+      id: '/memory/process/$processId'
+      path: '/memory/process/$processId'
+      fullPath: '/memory/process/$processId'
+      preLoaderRoute: typeof MemoryProcessProcessIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/biocompute/process/$processId': {
+      id: '/biocompute/process/$processId'
+      path: '/biocompute/process/$processId'
+      fullPath: '/biocompute/process/$processId'
+      preLoaderRoute: typeof BiocomputeProcessProcessIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/memory/process/$processId/edit': {
+      id: '/memory/process/$processId/edit'
+      path: '/edit'
+      fullPath: '/memory/process/$processId/edit'
+      preLoaderRoute: typeof MemoryProcessProcessIdEditRouteImport
+      parentRoute: typeof MemoryProcessProcessIdRoute
     }
   }
 }
@@ -306,6 +687,20 @@ const ConfigRouteChildren: ConfigRouteChildren = {
 const ConfigRouteWithChildren =
   ConfigRoute._addFileChildren(ConfigRouteChildren)
 
+interface MemoryProcessProcessIdRouteChildren {
+  MemoryProcessProcessIdEditRoute: typeof MemoryProcessProcessIdEditRoute
+}
+
+const MemoryProcessProcessIdRouteChildren: MemoryProcessProcessIdRouteChildren =
+  {
+    MemoryProcessProcessIdEditRoute: MemoryProcessProcessIdEditRoute,
+  }
+
+const MemoryProcessProcessIdRouteWithChildren =
+  MemoryProcessProcessIdRoute._addFileChildren(
+    MemoryProcessProcessIdRouteChildren,
+  )
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ChannelsRouteRoute: ChannelsRouteRouteWithChildren,
@@ -314,7 +709,25 @@ const rootRouteChildren: RootRouteChildren = {
   CredentialsRoute: CredentialsRoute,
   LogsRoute: LogsRoute,
   ModelsRoute: ModelsRoute,
+  BiocomputeMyRoute: BiocomputeMyRoute,
+  BiocomputeSpawnRoute: BiocomputeSpawnRoute,
+  MemoryMemoryIdRoute: MemoryMemoryIdRoute,
+  MemoryMyRoute: MemoryMyRoute,
+  MemoryRecoverRoute: MemoryRecoverRoute,
+  MemorySpawnRoute: MemorySpawnRoute,
+  StoreIdRoute: StoreIdRoute,
+  StoreCreateRoute: StoreCreateRoute,
+  BiocomputeIndexRoute: BiocomputeIndexRoute,
+  MemoryIndexRoute: MemoryIndexRoute,
   StoreIndexRoute: StoreIndexRoute,
+  BiocomputeProcessProcessIdRoute: BiocomputeProcessProcessIdRoute,
+  MemoryProcessProcessIdRoute: MemoryProcessProcessIdRouteWithChildren,
+  StoreAdsIdRoute: StoreAdsIdRoute,
+  StoreAdsCreateRoute: StoreAdsCreateRoute,
+  StoreStakingUserRoute: StoreStakingUserRoute,
+  StoreAdsIndexRoute: StoreAdsIndexRoute,
+  StoreDappsIndexRoute: StoreDappsIndexRoute,
+  StoreStakingIndexRoute: StoreStakingIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

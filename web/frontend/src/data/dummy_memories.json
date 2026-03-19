@@ -1,0 +1,85 @@
+[
+  {
+    "id": "proc1",
+    "name": "Personal Journal",
+    "type": "personal",
+    "public": true,
+    "tokenGate": {
+      "enabled": true,
+      "tokenId": "AOS",
+      "minAmount": 1000
+    },
+    "created_at": 1700000000000,
+    "memories": [
+      {
+        "id": "mem101",
+        "content": "Today I learned about AO processes and how to store memories permanently.",
+        "type": "note",
+        "importance": 0.8,
+        "timestamp": 1700001000000
+      },
+      {
+        "id": "mem102",
+        "content": "Meeting with the team: we discussed the new memory catalog feature.",
+        "type": "conversation",
+        "importance": 0.6,
+        "timestamp": 1700002000000
+      }
+    ]
+  },
+  {
+    "id": "proc2",
+    "name": "Work Notes",
+    "type": "work",
+    "public": false,
+    "tokenGate": null,
+    "created_at": 1700010000000,
+    "memories": [
+      {
+        "id": "mem201",
+        "content": "Project roadmap – Q2 goals: launch v2, integrate with AO.",
+        "type": "note",
+        "importance": 0.9,
+        "timestamp": 1700011000000
+      }
+    ]
+  },
+  {
+    "id": "proc5",
+    "name": "Personal Recipes",
+    "type": "personal",
+    "public": true,
+    "tokenGate": null,
+    "created_at": 1700040000000,
+    "memories": [
+      {
+        "id": "mem501",
+        "content": "Pasta recipe: 200g flour, 2 eggs, salt.",
+        "type": "note",
+        "importance": 0.3,
+        "timestamp": 1700041000000
+      }
+    ]
+  },
+  {
+    "id": "proc6",
+    "name": "Work Tasks",
+    "type": "work",
+    "public": true,
+    "tokenGate": {
+      "enabled": true,
+      "tokenId": "AOS",
+      "minAmount": 500
+    },
+    "created_at": 1700050000000,
+    "memories": [
+      {
+        "id": "mem601",
+        "content": "Complete memory catalog by Friday.",
+        "type": "task",
+        "importance": 0.7,
+        "timestamp": 1700051000000
+      }
+    ]
+  }
+]

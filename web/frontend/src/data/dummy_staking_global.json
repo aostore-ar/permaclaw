@@ -1,0 +1,103 @@
+{
+  "platformStats": {
+    "total_staked": 1250000,
+    "total_rewards": 75000,
+    "active_stakers": 3421,
+    "current_epoch": 47,
+    "staked_growth": 12.5,
+    "rewards_growth": 8.3,
+    "stakers_growth": 15.2,
+    "average_apy": 18.5,
+    "platform_fee": 2.5,
+    "avg_staking_duration": 120,
+    "weekly_new_stakers": 145,
+    "weekly_volume": 250000,
+    "weekly_rewards": 15000
+  },
+  "epochRewards": {
+    "AOS": 50000,
+    "USDA": 25000,
+    "USDC": 15000,
+    "epoch_progress": 0.65,
+    "time_remaining": "3 days 4 hours",
+    "next_distribution": "2025-04-01T00:00:00Z"
+  },
+  "tokenDistribution": {
+    "AOS": {
+      "percentage": 55.5,
+      "amount": 693750
+    },
+    "USDA": {
+      "percentage": 27.8,
+      "amount": 347500
+    },
+    "USDC": {
+      "percentage": 16.7,
+      "amount": 208750
+    }
+  },
+  "topStakers": [
+    {
+      "address": "0x7a3...b8f2",
+      "amount": 125000
+    },
+    {
+      "address": "0x9c4...d1e5",
+      "amount": 98000
+    },
+    {
+      "address": "0x2b6...f3a9",
+      "amount": 87200
+    },
+    {
+      "address": "0x5d8...c4b7",
+      "amount": 65400
+    },
+    {
+      "address": "0xe1f...a2c3",
+      "amount": 52100
+    }
+  ],
+  "recentActivity": [
+    {
+      "type": "stake",
+      "user": "0xabc...123",
+      "amount": 5000,
+      "token": "AOS",
+      "time_ago": "5 minutes ago",
+      "timestamp": 1742300000000
+    },
+    {
+      "type": "unstake",
+      "user": "0xdef...456",
+      "amount": 2500,
+      "token": "AOS",
+      "time_ago": "23 minutes ago",
+      "timestamp": 1742298000000
+    },
+    {
+      "type": "reward",
+      "user": "0x789...abc",
+      "amount": 125,
+      "token": "USDA",
+      "time_ago": "1 hour ago",
+      "timestamp": 1742295000000
+    },
+    {
+      "type": "stake",
+      "user": "0x321...def",
+      "amount": 10000,
+      "token": "USDC",
+      "time_ago": "2 hours ago",
+      "timestamp": 1742292000000
+    },
+    {
+      "type": "unstake",
+      "user": "0x654...ghi",
+      "amount": 3000,
+      "token": "AOS",
+      "time_ago": "5 hours ago",
+      "timestamp": 1742280000000
+    }
+  ]
+}

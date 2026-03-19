@@ -1,0 +1,63 @@
+{
+  "userStake": {
+    "amount": 25000,
+    "staked_at": 1740000000000,
+    "lock_period": 180,
+    "penalty": 0.15,
+    "unlock_time": 1755500000000
+  },
+  "userStats": {
+    "total_staked": 25000,
+    "available_rewards": 1250,
+    "days_remaining": 92,
+    "current_penalty": 0.15
+  },
+  "availableRewards": {
+    "AOS": 850,
+    "USDA": 320,
+    "USDC": 80
+  },
+  "userRewardsStats": {
+    "total_earned": 3240,
+    "total_withdrawn": 1990,
+    "pending_rewards": 1250
+  },
+  "rewardsHistory": [
+    {
+      "type": "stake",
+      "amount": 25000,
+      "token_id": "AOS",
+      "timestamp": 1740000000000
+    },
+    {
+      "type": "reward",
+      "amount": 450,
+      "token_id": "AOS",
+      "timestamp": 1740600000000
+    },
+    {
+      "type": "reward",
+      "amount": 280,
+      "token_id": "USDA",
+      "timestamp": 1741200000000
+    },
+    {
+      "type": "withdraw",
+      "amount": 1000,
+      "token_id": "AOS",
+      "timestamp": 1741500000000
+    },
+    {
+      "type": "reward",
+      "amount": 400,
+      "token_id": "AOS",
+      "timestamp": 1741800000000
+    },
+    {
+      "type": "reward",
+      "amount": 120,
+      "token_id": "USDC",
+      "timestamp": 1742400000000
+    }
+  ]
+}

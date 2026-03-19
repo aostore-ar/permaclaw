@@ -133,7 +133,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       },
       // aoStore group
       {
-        label: "store",   // key points to "aoStore" in translation
+        label: "aostore",   // key points to "aoStore" in translation
         defaultOpen: true,
         items: [
           {
@@ -149,7 +149,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             translateTitle: true,
           },
           {
-            title: "store.dapps",
+            title: "myDapps",
             url: "/store/dapps",
             icon: IconApps,
             translateTitle: true,
@@ -178,13 +178,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             url: "/biocompute",
             icon: IconMicroscope,
             translateTitle: true,
-          },
-          {
-            title: "permanent.processes",
-            url: "/processes",
-            icon: IconCpu,
-            translateTitle: true,
-          },
+          }
         ],
       },
       {
