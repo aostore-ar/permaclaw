@@ -1,3 +1,9 @@
+// PermaClaw - Ultra-lightweight personal AI agent with permanent memory
+// Based on and inspired by PicoClaw: https://github.com/sipeed/picoclaw
+// License: MIT
+//
+// Copyright (c) 2026 PermaClaw contributors
+
 package matrix
 
 import (
@@ -1123,8 +1129,8 @@ func localpartMentionRegexp(localpart string) *regexp.Regexp {
 	}
 
 	// Match Matrix mentions in plain text while avoiding false positives:
-	//   "@picoclaw" and "@picoclaw:matrix.org" should match,
-	//   "test@example.com" and "hellopicoclawworld" should not.
+	//   "@permaclaw" and "@permaclaw:matrix.org" should match,
+	//   "test@example.com" and "hellopermaclawworld" should not.
 	pattern := `(?i)(^|[^[:alnum:]_])@` + regexp.QuoteMeta(localpart) + `(?::[A-Za-z0-9._:-]+)?([^[:alnum:]_]|$)`
 	return regexp.MustCompile(pattern)
 }

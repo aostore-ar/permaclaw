@@ -2,1116 +2,823 @@ package openclaw
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
+	"testing"
 
-	"github.com/aostore-ar/permaclaw/pkg/config"
+	"github.com/aostore-ar/permaclaw/pkg/migrate/sources/openclaw"
 )
 
-type OpenClawConfig struct {
-	Auth     *OpenClawAuth     `json:"auth"`
-	Models   *OpenClawModels   `json:"models"`
-	Agents   *OpenClawAgents   `json:"agents"`
-	Tools    *OpenClawTools    `json:"tools"`
-	Channels *OpenClawChannels `json:"channels"`
-	Cron     json.RawMessage   `json:"cron"`
-	Hooks    json.RawMessage   `json:"hooks"`
-	Skills   *OpenClawSkills   `json:"skills"`
-	Memory   json.RawMessage   `json:"memory"`
-	Session  json.RawMessage   `json:"session"`
-}
-
-type OpenClawAuth struct {
-	Profiles json.RawMessage `json:"profiles"`
-	Order    json.RawMessage `json:"order"`
-}
-
-type OpenClawModels struct {
-	Providers map[string]json.RawMessage `json:"providers"`
-}
-
-type ProviderConfig struct {
-	BaseUrl string        `json:"baseUrl"`
-	Api     string        `json:"api"`
-	Models  []ModelConfig `json:"models"`
-	ApiKey  string        `json:"apiKey"`
-}
-
-type OpenClawModelConfig struct {
-	ID            string   `json:"id"`
-	Name          string   `json:"name"`
-	Reasoning     bool     `json:"reasoning"`
-	Input         []string `json:"input"`
-	Cost          Cost     `json:"cost"`
-	ContextWindow int      `json:"contextWindow"`
-	MaxTokens     int      `json:"maxTokens"`
-	Api           string   `json:"api,omitempty"`
-}
-
-type Cost struct {
-	Input      float64 `json:"input"`
-	Output     float64 `json:"output"`
-	CacheRead  float64 `json:"cacheRead"`
-	CacheWrite float64 `json:"cacheWrite"`
-}
-
-type OpenClawTools struct {
-	Profile *string  `json:"profile"`
-	Allow   []string `json:"allow"`
-	Deny    []string `json:"deny"`
-}
-
-type OpenClawAgents struct {
-	Defaults *OpenClawAgentDefaults `json:"defaults"`
-	List     []OpenClawAgentEntry   `json:"list"`
-}
-
-type OpenClawAgentDefaults struct {
-	Model     *OpenClawAgentModel `json:"model"`
-	Workspace *string             `json:"workspace"`
-	Tools     *OpenClawAgentTools `json:"tools"`
-	Identity  *string             `json:"identity"`
-}
-
-type OpenClawAgentModel struct {
-	Simple    string   `json:"-"`
-	Primary   *string  `json:"primary"`
-	Fallbacks []string `json:"fallbacks"`
-}
-
-func (m *OpenClawAgentModel) GetPrimary() string {
-	if m.Simple != "" {
-		return m.Simple
-	}
-	if m.Primary != nil {
-		return *m.Primary
-	}
-	return ""
-}
-
-func (m *OpenClawAgentModel) GetFallbacks() []string {
-	return m.Fallbacks
-}
-
-type OpenClawAgentEntry struct {
-	ID        string              `json:"id"`
-	Name      *string             `json:"name"`
-	Model     *OpenClawAgentModel `json:"model"`
-	Tools     *OpenClawAgentTools `json:"tools"`
-	Workspace *string             `json:"workspace"`
-	Skills    []string            `json:"skills"`
-	Identity  *string             `json:"identity"`
-}
-
-type OpenClawAgentTools struct {
-	Profile   *string  `json:"profile"`
-	Allow     []string `json:"allow"`
-	Deny      []string `json:"deny"`
-	AlsoAllow []string `json:"alsoAllow"`
-}
-
-type OpenClawChannels struct {
-	Telegram    *OpenClawTelegramConfig    `json:"telegram"`
-	Discord     *OpenClawDiscordConfig     `json:"discord"`
-	Slack       *OpenClawSlackConfig       `json:"slack"`
-	WhatsApp    *OpenClawWhatsAppConfig    `json:"whatsapp"`
-	Signal      *OpenClawSignalConfig      `json:"signal"`
-	Matrix      *OpenClawMatrixConfig      `json:"matrix"`
-	GoogleChat  *OpenClawGoogleChatConfig  `json:"googlechat"`
-	Teams       *OpenClawTeamsConfig       `json:"msteams"`
-	IRC         *OpenClawIrcConfig         `json:"irc"`
-	Mattermost  *OpenClawMattermostConfig  `json:"mattermost"`
-	Feishu      *OpenClawFeishuConfig      `json:"feishu"`
-	IMessage    *OpenClawIMessageConfig    `json:"imessage"`
-	BlueBubbles *OpenClawBlueBubblesConfig `json:"bluebubbles"`
-	QQ          *OpenClawQQConfig          `json:"qq"`
-	DingTalk    *OpenClawDingTalkConfig    `json:"dingtalk"`
-	MaixCam     *OpenClawMaixCamConfig     `json:"maixcam"`
-}
-
-type OpenClawTelegramConfig struct {
-	BotToken    *string  `json:"botToken"`
-	AllowFrom   []string `json:"allowFrom"`
-	GroupPolicy *string  `json:"groupPolicy"`
-	DmPolicy    *string  `json:"dmPolicy"`
-	Enabled     *bool    `json:"enabled"`
-}
-
-type OpenClawDiscordConfig struct {
-	Token       *string         `json:"token"`
-	Guilds      json.RawMessage `json:"guilds"`
-	DmPolicy    *string         `json:"dmPolicy"`
-	GroupPolicy *string         `json:"groupPolicy"`
-	AllowFrom   []string        `json:"allowFrom"`
-	Enabled     *bool           `json:"enabled"`
-}
-
-type OpenClawSlackConfig struct {
-	BotToken    *string  `json:"botToken"`
-	AppToken    *string  `json:"appToken"`
-	DmPolicy    *string  `json:"dmPolicy"`
-	GroupPolicy *string  `json:"groupPolicy"`
-	AllowFrom   []string `json:"allowFrom"`
-	Enabled     *bool    `json:"enabled"`
-}
-
-type OpenClawWhatsAppConfig struct {
-	AuthDir     *string  `json:"authDir"`
-	DmPolicy    *string  `json:"dmPolicy"`
-	AllowFrom   []string `json:"allowFrom"`
-	GroupPolicy *string  `json:"groupPolicy"`
-	Enabled     *bool    `json:"enabled"`
-	BridgeURL   *string  `json:"bridgeUrl"`
-}
-
-type OpenClawSignalConfig struct {
-	HttpUrl   *string  `json:"httpUrl"`
-	HttpHost  *string  `json:"httpHost"`
-	HttpPort  *int     `json:"httpPort"`
-	Account   *string  `json:"account"`
-	DmPolicy  *string  `json:"dmPolicy"`
-	AllowFrom []string `json:"allowFrom"`
-	Enabled   *bool    `json:"enabled"`
-}
-
-type OpenClawMatrixConfig struct {
-	Homeserver  *string  `json:"homeserver"`
-	UserID      *string  `json:"userId"`
-	AccessToken *string  `json:"accessToken"`
-	Rooms       []string `json:"rooms"`
-	DmPolicy    *string  `json:"dmPolicy"`
-	AllowFrom   []string `json:"allowFrom"`
-	Enabled     *bool    `json:"enabled"`
-}
-
-type OpenClawGoogleChatConfig struct {
-	ServiceAccountFile *string `json:"serviceAccountFile"`
-	WebhookPath        *string `json:"webhookPath"`
-	BotUser            *string `json:"botUser"`
-	DmPolicy           *string `json:"dmPolicy"`
-	Enabled            *bool   `json:"enabled"`
-}
-
-type OpenClawTeamsConfig struct {
-	AppID       *string  `json:"appId"`
-	AppPassword *string  `json:"appPassword"`
-	TenantID    *string  `json:"tenantId"`
-	DmPolicy    *string  `json:"dmPolicy"`
-	AllowFrom   []string `json:"allowFrom"`
-	Enabled     *bool    `json:"enabled"`
-}
-
-type OpenClawIrcConfig struct {
-	Host      *string  `json:"host"`
-	Port      *int     `json:"port"`
-	TLS       *bool    `json:"tls"`
-	Nick      *string  `json:"nick"`
-	Password  *string  `json:"password"`
-	Channels  []string `json:"channels"`
-	DmPolicy  *string  `json:"dmPolicy"`
-	AllowFrom []string `json:"allowFrom"`
-	Enabled   *bool    `json:"enabled"`
-}
-
-type OpenClawMattermostConfig struct {
-	BotToken  *string  `json:"botToken"`
-	BaseURL   *string  `json:"baseUrl"`
-	DmPolicy  *string  `json:"dmPolicy"`
-	AllowFrom []string `json:"allowFrom"`
-	Enabled   *bool    `json:"enabled"`
-}
-
-type OpenClawFeishuConfig struct {
-	AppID             *string  `json:"appId"`
-	AppSecret         *string  `json:"appSecret"`
-	Domain            *string  `json:"domain"`
-	DmPolicy          *string  `json:"dmPolicy"`
-	Enabled           *bool    `json:"enabled"`
-	VerificationToken *string  `json:"verificationToken"`
-	EncryptKey        *string  `json:"encryptKey"`
-	AllowFrom         []string `json:"allowFrom"`
-}
-
-type OpenClawIMessageConfig struct {
-	CliPath   *string  `json:"cliPath"`
-	DbPath    *string  `json:"dbPath"`
-	DmPolicy  *string  `json:"dmPolicy"`
-	AllowFrom []string `json:"allowFrom"`
-	Enabled   *bool    `json:"enabled"`
-}
-
-type OpenClawBlueBubblesConfig struct {
-	ServerURL *string  `json:"serverUrl"`
-	Password  *string  `json:"password"`
-	DmPolicy  *string  `json:"dmPolicy"`
-	AllowFrom []string `json:"allowFrom"`
-	Enabled   *bool    `json:"enabled"`
-}
-
-type OpenClawQQConfig struct {
-	AppID     *string  `json:"appId"`
-	AppSecret *string  `json:"appSecret"`
-	DmPolicy  *string  `json:"dmPolicy"`
-	AllowFrom []string `json:"allowFrom"`
-	Enabled   *bool    `json:"enabled"`
-}
-
-type OpenClawDingTalkConfig struct {
-	AppID     *string  `json:"appId"`
-	AppSecret *string  `json:"appSecret"`
-	DmPolicy  *string  `json:"dmPolicy"`
-	AllowFrom []string `json:"allowFrom"`
-	Enabled   *bool    `json:"enabled"`
-}
-
-type OpenClawMaixCamConfig struct {
-	Host      *string  `json:"host"`
-	Port      *int     `json:"port"`
-	DmPolicy  *string  `json:"dmPolicy"`
-	AllowFrom []string `json:"allowFrom"`
-	Enabled   *bool    `json:"enabled"`
-}
-
-type OpenClawSkills struct {
-	Entries map[string]json.RawMessage `json:"entries"`
-	Load    json.RawMessage            `json:"load"`
-}
-
-type OpenClawProviderConfig struct {
-	APIKey  string `json:"api_key"`
-	BaseURL string `json:"base_url"`
-}
-
-func (c *OpenClawConfig) GetEnabled() bool {
-	return true
-}
-
-func LoadOpenClawConfig(path string) (*OpenClawConfig, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read config: %w", err)
-	}
-
-	var config OpenClawConfig
-	if err := json.Unmarshal(data, &config); err != nil {
-		return nil, fmt.Errorf("failed to parse JSON: %w", err)
-	}
-
-	return &config, nil
-}
-
-func LoadOpenClawConfigFromDir(dir string) (*OpenClawConfig, error) {
-	candidates := []string{
-		filepath.Join(dir, "openclaw.json"),
-		filepath.Join(dir, "config.json"),
-	}
-
-	for _, p := range candidates {
-		if _, err := os.Stat(p); err == nil {
-			return LoadOpenClawConfig(p)
-		}
-	}
-
-	return nil, fmt.Errorf("no config file found in %s", dir)
-}
-
-func GetProviderConfig(models *OpenClawModels) map[string]OpenClawProviderConfig {
-	result := make(map[string]OpenClawProviderConfig)
-	if models == nil || models.Providers == nil {
-		return result
-	}
-
-	for name, raw := range models.Providers {
-		var prov OpenClawProviderConfig
-		if err := json.Unmarshal(raw, &prov); err != nil {
-			continue
-		}
-		mappedName := mapProvider(name)
-		result[mappedName] = prov
-	}
-
-	return result
-}
-
-func GetProviderConfigFromDir(dir string) map[string]ProviderConfig {
-	result := make(map[string]ProviderConfig)
-	p := filepath.Join(dir, "agents", "main", "agent", "models.json")
-
-	if _, err := os.Stat(p); err != nil {
-		return result
-	}
-
-	data, err := os.ReadFile(p)
-	if err != nil {
-		return result
-	}
-	var models OpenClawModels
-	if err := json.Unmarshal(data, &models); err != nil {
-		return result
-	}
-
-	for name, raw := range models.Providers {
-		var prov ProviderConfig
-		if err := json.Unmarshal(raw, &prov); err != nil {
-			continue
-		}
-		mappedName := mapProvider(name)
-		result[mappedName] = prov
-	}
-	return result
-}
-
-func (c *OpenClawConfig) IsChannelEnabled(name string) bool {
-	switch name {
-	case "telegram":
-		return c.Channels.Telegram == nil || c.Channels.Telegram.Enabled == nil || *c.Channels.Telegram.Enabled
-	case "discord":
-		return c.Channels.Discord == nil || c.Channels.Discord.Enabled == nil || *c.Channels.Discord.Enabled
-	case "slack":
-		return c.Channels.Slack == nil || c.Channels.Slack.Enabled == nil || *c.Channels.Slack.Enabled
-	case "matrix":
-		return c.Channels.Matrix == nil || c.Channels.Matrix.Enabled == nil || *c.Channels.Matrix.Enabled
-	case "whatsapp":
-		return c.Channels.WhatsApp == nil || c.Channels.WhatsApp.Enabled == nil || *c.Channels.WhatsApp.Enabled
-	case "feishu":
-		return c.Channels.Feishu == nil || c.Channels.Feishu.Enabled == nil || *c.Channels.Feishu.Enabled
-	default:
-		return false
-	}
-}
-
-func GetChannelAllowFrom(ch any) []string {
-	switch c := ch.(type) {
-	case *OpenClawTelegramConfig:
-		if c == nil {
-			return nil
-		}
-		return c.AllowFrom
-	case *OpenClawDiscordConfig:
-		if c == nil {
-			return nil
-		}
-		return c.AllowFrom
-	case *OpenClawSlackConfig:
-		if c == nil {
-			return nil
-		}
-		return c.AllowFrom
-	case *OpenClawMatrixConfig:
-		if c == nil {
-			return nil
-		}
-		return c.AllowFrom
-	case *OpenClawWhatsAppConfig:
-		if c == nil {
-			return nil
-		}
-		return c.AllowFrom
-	case *OpenClawFeishuConfig:
-		if c == nil {
-			return nil
-		}
-		return c.AllowFrom
-	default:
-		return nil
-	}
-}
-
-func (c *OpenClawConfig) GetDefaultModel() (provider, model string) {
-	if c.Agents == nil || c.Agents.Defaults == nil || c.Agents.Defaults.Model == nil {
-		return "anthropic", "claude-sonnet-4-20250514"
-	}
-
-	primary := c.Agents.Defaults.Model.GetPrimary()
-	if primary == "" {
-		return "anthropic", "claude-sonnet-4-20250514"
-	}
-
-	parts := strings.Split(primary, "/")
-	if len(parts) > 1 {
-		return mapProvider(parts[0]), parts[1]
-	}
-
-	return "anthropic", primary
-}
-
-func (c *OpenClawConfig) GetDefaultWorkspace() string {
-	if c.Agents == nil || c.Agents.Defaults == nil || c.Agents.Defaults.Workspace == nil {
-		return ""
-	}
-	return rewriteWorkspacePath(*c.Agents.Defaults.Workspace)
-}
-
-func (c *OpenClawConfig) GetAgents() []OpenClawAgentEntry {
-	if c.Agents == nil {
-		return nil
-	}
-	return c.Agents.List
-}
-
-func (c *OpenClawConfig) HasSkills() bool {
-	return c.Skills != nil && c.Skills.Entries != nil && len(c.Skills.Entries) > 0
-}
-
-func (c *OpenClawConfig) HasMemory() bool {
-	return c.Memory != nil && len(c.Memory) > 0
-}
-
-func (c *OpenClawConfig) HasCron() bool {
-	return c.Cron != nil && len(c.Cron) > 0
-}
-
-func (c *OpenClawConfig) HasHooks() bool {
-	return c.Hooks != nil && len(c.Hooks) > 0
-}
-
-func (c *OpenClawConfig) HasSession() bool {
-	return c.Session != nil && len(c.Session) > 0
-}
-
-func (c *OpenClawConfig) HasAuthProfiles() bool {
-	return c.Auth != nil && c.Auth.Profiles != nil && len(c.Auth.Profiles) > 0
-}
-
-func (c *OpenClawConfig) ConvertToPicoClaw(sourceHome string) (*PicoClawConfig, []string, error) {
-	cfg := &PicoClawConfig{}
-	var warnings []string
-
-	provider, modelName := c.GetDefaultModel()
-	cfg.Agents.Defaults.Workspace = c.GetDefaultWorkspace()
-	cfg.Agents.Defaults.ModelName = modelName
-
-	providerConfigs := GetProviderConfigFromDir(sourceHome)
-	defaultAPIKey := ""
-	defaultBaseURL := ""
-
-	if provCfg, ok := providerConfigs[provider]; ok {
-		defaultAPIKey = provCfg.ApiKey
-		defaultBaseURL = provCfg.BaseUrl
-	}
-
-	cfg.ModelList = []ModelConfig{
-		{
-			ModelName: modelName,
-			Model:     fmt.Sprintf("%s/%s", provider, modelName),
-			APIKey:    defaultAPIKey,
-			APIBase:   defaultBaseURL,
+func TestLoadOpenClawConfig(t *testing.T) {
+	tmpDir := t.TempDir()
+	configPath := filepath.Join(tmpDir, "openclaw.json")
+
+	testConfig := `{
+		"agents": {
+			"defaults": {
+				"model": {
+					"primary": "anthropic/claude-sonnet-4-20250514"
+				},
+				"workspace": "~/.openclaw/workspace"
+			},
+			"list": [
+				{
+					"id": "main",
+					"name": "Main Agent",
+					"model": {
+						"primary": "openai/gpt-4o",
+						"fallbacks": ["claude-3-opus"]
+					}
+				}
+			]
 		},
-	}
-
-	for provName, provCfg := range providerConfigs {
-		if provName == provider {
-			continue
-		}
-		if provCfg.ApiKey != "" {
-			continue
-		}
-		cfg.ModelList = append(cfg.ModelList, ModelConfig{
-			ModelName: fmt.Sprintf("%s", provName),
-			Model:     fmt.Sprintf("%s/%s", provName, provName),
-			APIKey:    provCfg.ApiKey,
-			APIBase:   provCfg.BaseUrl,
-		})
-	}
-
-	cfg.Channels = c.convertChannels(&warnings)
-
-	agentList := c.convertAgents(&warnings)
-	if len(agentList) > 0 {
-		cfg.Agents.List = agentList
-	}
-
-	if c.HasSkills() {
-		warnings = append(
-			warnings,
-			fmt.Sprintf(
-				"Skills (%d entries) not automatically migrated - reinstall via permaclaw CLI",
-				len(c.Skills.Entries),
-			),
-		)
-	}
-	if c.HasMemory() {
-		warnings = append(warnings, "Memory backend config not migrated - PermaClaw uses AO processes with encrypted memory")
-	}
-	if c.HasCron() {
-		warnings = append(
-			warnings,
-			"Cron job scheduling not supported in PermaClaw - consider using external schedulers",
-		)
-	}
-	if c.HasHooks() {
-		warnings = append(warnings, "Webhook hooks not supported in PermaClaw - use event system instead")
-	}
-	if c.HasSession() {
-		warnings = append(warnings, "Session scope config differs - PermaClaw uses per-agent sessions by default")
-	}
-	if c.HasAuthProfiles() {
-		warnings = append(
-			warnings,
-			"Auth profiles (API keys, OAuth tokens) not migrated for security - set env vars manually",
-		)
-	}
-
-	return cfg, warnings, nil
-}
-
-type ModelConfig struct {
-	ModelName string `json:"model_name"`
-	Model     string `json:"model"`
-	APIBase   string `json:"api_base,omitempty"`
-	APIKey    string `json:"api_key"`
-	Proxy     string `json:"proxy,omitempty"`
-}
-
-type PicoClawConfig struct {
-	Agents    AgentsConfig   `json:"agents"`
-	Bindings  []AgentBinding `json:"bindings,omitempty"`
-	Channels  ChannelsConfig `json:"channels"`
-	ModelList []ModelConfig  `json:"model_list"`
-	Gateway   GatewayConfig  `json:"gateway"`
-	Tools     ToolsConfig    `json:"tools"`
-}
-
-type AgentsConfig struct {
-	Defaults AgentDefaults `json:"defaults"`
-	List     []AgentConfig `json:"list,omitempty"`
-}
-
-type AgentDefaults struct {
-	Workspace           string   `json:"workspace"`
-	RestrictToWorkspace bool     `json:"restrict_to_workspace"`
-	Provider            string   `json:"provider"`
-	ModelName           string   `json:"model_name"`
-	Model               string   `json:"model,omitempty"`
-	ModelFallbacks      []string `json:"model_fallbacks,omitempty"`
-	ImageModel          string   `json:"image_model,omitempty"`
-	ImageModelFallbacks []string `json:"image_model_fallbacks,omitempty"`
-	MaxTokens           int      `json:"max_tokens"`
-	Temperature         *float64 `json:"temperature,omitempty"`
-	MaxToolIterations   int      `json:"max_tool_iterations"`
-}
-
-type AgentConfig struct {
-	ID        string            `json:"id"`
-	Default   bool              `json:"default,omitempty"`
-	Name      string            `json:"name,omitempty"`
-	Workspace string            `json:"workspace,omitempty"`
-	Model     *AgentModelConfig `json:"model,omitempty"`
-	Skills    []string          `json:"skills,omitempty"`
-}
-
-type AgentModelConfig struct {
-	Primary   string   `json:"primary,omitempty"`
-	Fallbacks []string `json:"fallbacks,omitempty"`
-}
-
-type AgentBinding struct {
-	AgentID string       `json:"agent_id"`
-	Match   BindingMatch `json:"match"`
-}
-
-type BindingMatch struct {
-	Channel   string     `json:"channel"`
-	AccountID string     `json:"account_id,omitempty"`
-	Peer      *PeerMatch `json:"peer,omitempty"`
-	GuildID   string     `json:"guild_id,omitempty"`
-	TeamID    string     `json:"team_id,omitempty"`
-}
-
-type PeerMatch struct {
-	Kind string `json:"kind"`
-	ID   string `json:"id"`
-}
-
-type ChannelsConfig struct {
-	WhatsApp WhatsAppConfig `json:"whatsapp"`
-	Telegram TelegramConfig `json:"telegram"`
-	Feishu   FeishuConfig   `json:"feishu"`
-	Discord  DiscordConfig  `json:"discord"`
-	MaixCam  MaixCamConfig  `json:"maixcam"`
-	QQ       QQConfig       `json:"qq"`
-	DingTalk DingTalkConfig `json:"dingtalk"`
-	Slack    SlackConfig    `json:"slack"`
-	Matrix   MatrixConfig   `json:"matrix"`
-	LINE     LINEConfig     `json:"line"`
-}
-
-type WhatsAppConfig struct {
-	Enabled   bool     `json:"enabled"`
-	BridgeURL string   `json:"bridge_url"`
-	AllowFrom []string `json:"allow_from"`
-}
-
-type TelegramConfig struct {
-	Enabled   bool     `json:"enabled"`
-	Token     string   `json:"token"`
-	Proxy     string   `json:"proxy"`
-	AllowFrom []string `json:"allow_from"`
-}
-
-type FeishuConfig struct {
-	Enabled           bool     `json:"enabled"`
-	AppID             string   `json:"app_id"`
-	AppSecret         string   `json:"app_secret"`
-	EncryptKey        string   `json:"encrypt_key"`
-	VerificationToken string   `json:"verification_token"`
-	AllowFrom         []string `json:"allow_from"`
-}
-
-type DiscordConfig struct {
-	Enabled     bool     `json:"enabled"`
-	Token       string   `json:"token"`
-	MentionOnly bool     `json:"mention_only"`
-	AllowFrom   []string `json:"allow_from"`
-}
-
-type MaixCamConfig struct {
-	Enabled   bool     `json:"enabled"`
-	Host      string   `json:"host"`
-	Port      int      `json:"port"`
-	AllowFrom []string `json:"allow_from"`
-}
-
-type QQConfig struct {
-	Enabled   bool     `json:"enabled"`
-	AppID     string   `json:"app_id"`
-	AppSecret string   `json:"app_secret"`
-	AllowFrom []string `json:"allow_from"`
-}
-
-type DingTalkConfig struct {
-	Enabled      bool     `json:"enabled"`
-	ClientID     string   `json:"client_id"`
-	ClientSecret string   `json:"client_secret"`
-	AllowFrom    []string `json:"allow_from"`
-}
-
-type SlackConfig struct {
-	Enabled   bool     `json:"enabled"`
-	BotToken  string   `json:"bot_token"`
-	AppToken  string   `json:"app_token"`
-	AllowFrom []string `json:"allow_from"`
-}
-
-type MatrixConfig struct {
-	Enabled     bool     `json:"enabled"`
-	Homeserver  string   `json:"homeserver"`
-	UserID      string   `json:"user_id"`
-	AccessToken string   `json:"access_token"`
-	AllowFrom   []string `json:"allow_from"`
-}
-
-type LINEConfig struct {
-	Enabled            bool     `json:"enabled"`
-	ChannelSecret      string   `json:"channel_secret"`
-	ChannelAccessToken string   `json:"channel_access_token"`
-	WebhookHost        string   `json:"webhook_host"`
-	WebhookPort        int      `json:"webhook_port"`
-	WebhookPath        string   `json:"webhook_path"`
-	AllowFrom          []string `json:"allow_from"`
-}
-
-type GatewayConfig struct {
-	Host string `json:"host"`
-	Port int    `json:"port"`
-}
-
-type ToolsConfig struct {
-	Web  WebToolsConfig `json:"web"`
-	Cron CronConfig     `json:"cron"`
-	Exec ExecConfig     `json:"exec"`
-}
-
-type WebToolsConfig struct {
-	Brave      BraveConfig      `json:"brave"`
-	Tavily     TavilyConfig     `json:"tavily"`
-	DuckDuckGo DuckDuckGoConfig `json:"duckduckgo"`
-	Perplexity PerplexityConfig `json:"perplexity"`
-	Proxy      string           `json:"proxy,omitempty"`
-}
-
-type BraveConfig struct {
-	Enabled    bool     `json:"enabled"`
-	APIKey     string   `json:"api_key"`
-	APIKeys    []string `json:"api_keys"`
-	MaxResults int      `json:"max_results"`
-}
-
-type TavilyConfig struct {
-	Enabled    bool     `json:"enabled"`
-	APIKey     string   `json:"api_key"`
-	APIKeys    []string `json:"api_keys"`
-	BaseURL    string   `json:"base_url"`
-	MaxResults int      `json:"max_results"`
-}
-
-type DuckDuckGoConfig struct {
-	Enabled    bool `json:"enabled"`
-	MaxResults int  `json:"max_results"`
-}
-
-type PerplexityConfig struct {
-	Enabled    bool     `json:"enabled"`
-	APIKey     string   `json:"api_key"`
-	APIKeys    []string `json:"api_keys"`
-	MaxResults int      `json:"max_results"`
-}
-
-type CronConfig struct {
-	ExecTimeoutMinutes int `json:"exec_timeout_minutes"`
-}
-
-type ExecConfig struct {
-	EnableDenyPatterns bool     `json:"enable_deny_patterns"`
-	CustomDenyPatterns []string `json:"custom_deny_patterns"`
-}
-
-func (c *OpenClawConfig) convertChannels(warnings *[]string) ChannelsConfig {
-	channels := ChannelsConfig{}
-
-	if c.Channels == nil {
-		return channels
-	}
-
-	if c.Channels.Telegram != nil {
-		enabled := c.Channels.Telegram.Enabled == nil || *c.Channels.Telegram.Enabled
-		channels.Telegram = TelegramConfig{
-			Enabled:   enabled,
-			AllowFrom: c.Channels.Telegram.AllowFrom,
-		}
-		if c.Channels.Telegram.BotToken != nil {
-			channels.Telegram.Token = *c.Channels.Telegram.BotToken
-		}
-	}
-
-	if c.Channels.Discord != nil {
-		enabled := c.Channels.Discord.Enabled == nil || *c.Channels.Discord.Enabled
-		channels.Discord = DiscordConfig{
-			Enabled:   enabled,
-			AllowFrom: c.Channels.Discord.AllowFrom,
-		}
-		if c.Channels.Discord.Token != nil {
-			channels.Discord.Token = *c.Channels.Discord.Token
-		}
-	}
-
-	if c.Channels.Slack != nil {
-		enabled := c.Channels.Slack.Enabled == nil || *c.Channels.Slack.Enabled
-		channels.Slack = SlackConfig{
-			Enabled:   enabled,
-			AllowFrom: c.Channels.Slack.AllowFrom,
-		}
-		if c.Channels.Slack.BotToken != nil {
-			channels.Slack.BotToken = *c.Channels.Slack.BotToken
-		}
-		if c.Channels.Slack.AppToken != nil {
-			channels.Slack.AppToken = *c.Channels.Slack.AppToken
-		}
-	}
-
-	if c.Channels.WhatsApp != nil {
-		enabled := c.Channels.WhatsApp.Enabled == nil || *c.Channels.WhatsApp.Enabled
-		channels.WhatsApp = WhatsAppConfig{
-			Enabled:   enabled,
-			AllowFrom: c.Channels.WhatsApp.AllowFrom,
-		}
-		if c.Channels.WhatsApp.BridgeURL != nil {
-			channels.WhatsApp.BridgeURL = *c.Channels.WhatsApp.BridgeURL
-		}
-	}
-
-	if c.Channels.Feishu != nil {
-		enabled := c.Channels.Feishu.Enabled == nil || *c.Channels.Feishu.Enabled
-		channels.Feishu = FeishuConfig{
-			Enabled:   enabled,
-			AllowFrom: c.Channels.Feishu.AllowFrom,
-		}
-		if c.Channels.Feishu.AppID != nil {
-			channels.Feishu.AppID = *c.Channels.Feishu.AppID
-		}
-		if c.Channels.Feishu.AppSecret != nil {
-			channels.Feishu.AppSecret = *c.Channels.Feishu.AppSecret
-		}
-		if c.Channels.Feishu.EncryptKey != nil {
-			channels.Feishu.EncryptKey = *c.Channels.Feishu.EncryptKey
-		}
-		if c.Channels.Feishu.VerificationToken != nil {
-			channels.Feishu.VerificationToken = *c.Channels.Feishu.VerificationToken
-		}
-	}
-
-	if c.Channels.QQ != nil && supportedChannels["qq"] {
-		channels.QQ = QQConfig{
-			Enabled:   true,
-			AllowFrom: c.Channels.QQ.AllowFrom,
-		}
-		if c.Channels.QQ.AppID != nil {
-			channels.QQ.AppID = *c.Channels.QQ.AppID
-		}
-		if c.Channels.QQ.AppSecret != nil {
-			channels.QQ.AppSecret = *c.Channels.QQ.AppSecret
-		}
-	}
-
-	if c.Channels.DingTalk != nil && supportedChannels["dingtalk"] {
-		channels.DingTalk = DingTalkConfig{
-			Enabled:   true,
-			AllowFrom: c.Channels.DingTalk.AllowFrom,
-		}
-		if c.Channels.DingTalk.AppID != nil {
-			channels.DingTalk.ClientID = *c.Channels.DingTalk.AppID
-		}
-		if c.Channels.DingTalk.AppSecret != nil {
-			channels.DingTalk.ClientSecret = *c.Channels.DingTalk.AppSecret
-		}
-	}
-
-	if c.Channels.MaixCam != nil && supportedChannels["maixcam"] {
-		channels.MaixCam = MaixCamConfig{
-			Enabled:   true,
-			AllowFrom: c.Channels.MaixCam.AllowFrom,
-		}
-		if c.Channels.MaixCam.Host != nil {
-			channels.MaixCam.Host = *c.Channels.MaixCam.Host
-		}
-		if c.Channels.MaixCam.Port != nil {
-			channels.MaixCam.Port = *c.Channels.MaixCam.Port
-		}
-	}
-
-	if c.Channels.Matrix != nil && supportedChannels["matrix"] {
-		enabled := c.Channels.Matrix.Enabled == nil || *c.Channels.Matrix.Enabled
-		channels.Matrix = MatrixConfig{
-			Enabled:   enabled,
-			AllowFrom: c.Channels.Matrix.AllowFrom,
-		}
-		if c.Channels.Matrix.Homeserver != nil {
-			channels.Matrix.Homeserver = *c.Channels.Matrix.Homeserver
-		}
-		if c.Channels.Matrix.UserID != nil {
-			channels.Matrix.UserID = *c.Channels.Matrix.UserID
-		}
-		if c.Channels.Matrix.AccessToken != nil {
-			channels.Matrix.AccessToken = *c.Channels.Matrix.AccessToken
-		}
-	}
-
-	if c.Channels.Signal != nil {
-		*warnings = append(*warnings, "Channel 'signal': No PermaClaw adapter available")
-	}
-	if c.Channels.IRC != nil {
-		*warnings = append(*warnings, "Channel 'irc': No PermaClaw adapter available")
-	}
-	if c.Channels.Mattermost != nil {
-		*warnings = append(*warnings, "Channel 'mattermost': No PermaClaw adapter available")
-	}
-	if c.Channels.IMessage != nil {
-		*warnings = append(*warnings, "Channel 'imessage': macOS-only channel - requires manual setup")
-	}
-	if c.Channels.BlueBubbles != nil {
-		*warnings = append(
-			*warnings,
-			"Channel 'bluebubbles': No PermaClaw adapter available - consider iMessage instead",
-		)
-	}
-
-	return channels
-}
-
-func (c *OpenClawConfig) convertAgents(warnings *[]string) []AgentConfig {
-	var agents []AgentConfig
-
-	if c.Agents == nil {
-		return agents
-	}
-
-	for _, entry := range c.Agents.List {
-		agentID := entry.ID
-		if agentID == "" {
-			continue
-		}
-
-		agentName := agentID
-		if entry.Name != nil {
-			agentName = *entry.Name
-		}
-
-		agentCfg := AgentConfig{
-			ID:      agentID,
-			Name:    agentName,
-			Default: len(agents) == 0,
-		}
-
-		if entry.Workspace != nil {
-			agentCfg.Workspace = rewriteWorkspacePath(*entry.Workspace)
-		}
-
-		if entry.Model != nil {
-			primary := entry.Model.GetPrimary()
-			if primary != "" {
-				agentCfg.Model = &AgentModelConfig{
-					Primary:   primary,
-					Fallbacks: entry.Model.GetFallbacks(),
+		"channels": {
+			"telegram": {
+				"enabled": true,
+				"botToken": "test-token",
+				"allowFrom": ["user1", "user2"]
+			},
+			"discord": {
+				"enabled": true,
+				"token": "discord-token"
+			}
+		},
+		"models": {
+			"providers": {
+				"anthropic": {
+					"api_key": "sk-ant-test",
+					"base_url": "https://api.anthropic.com"
+				},
+				"openai": {
+					"api_key": "sk-test"
 				}
 			}
 		}
+	}`
 
-		if len(entry.Skills) > 0 {
-			agentCfg.Skills = entry.Skills
-		}
-
-		agents = append(agents, agentCfg)
+	err := os.WriteFile(configPath, []byte(testConfig), 0o644)
+	if err != nil {
+		t.Fatalf("failed to write test config: %v", err)
 	}
 
-	return agents
+	cfg, err := LoadOpenClawConfig(configPath)
+	if err != nil {
+		t.Fatalf("failed to load config: %v", err)
+	}
+
+	if cfg.Agents == nil {
+		t.Error("agents should not be nil")
+	}
+
+	if cfg.Agents.Defaults == nil {
+		t.Error("agents.defaults should not be nil")
+	}
+
+	provider, model := cfg.GetDefaultModel()
+	if provider != "anthropic" {
+		t.Errorf("expected provider 'anthropic', got '%s'", provider)
+	}
+	if model != "claude-sonnet-4-20250514" {
+		t.Errorf("expected model 'claude-sonnet-4-20250514', got '%s'", model)
+	}
+
+	workspace := cfg.GetDefaultWorkspace()
+	if workspace != "~/.permaclaw/workspace" {
+		t.Errorf("expected workspace '~/.permaclaw/workspace', got '%s'", workspace)
+	}
+
+	agents := cfg.GetAgents()
+	if len(agents) != 1 {
+		t.Errorf("expected 1 agent, got %d", len(agents))
+	}
+	if agents[0].ID != "main" {
+		t.Errorf("expected agent id 'main', got '%s'", agents[0].ID)
+	}
+
+	if cfg.Channels == nil {
+		t.Error("channels should not be nil")
+	}
+	if cfg.Channels.Telegram == nil {
+		t.Error("telegram channel should not be nil")
+	}
+	if cfg.Channels.Telegram.BotToken == nil || *cfg.Channels.Telegram.BotToken != "test-token" {
+		t.Error("telegram bot token not parsed correctly")
+	}
 }
 
-func (c *PicoClawConfig) ToStandardConfig() *config.Config {
-	cfg := config.DefaultConfig()
+func TestGetProviderConfig(t *testing.T) {
+	tmpDir := t.TempDir()
+	configPath := filepath.Join(tmpDir, "openclaw.json")
 
-	cfg.Agents.Defaults.Workspace = c.Agents.Defaults.Workspace
-	cfg.Agents.Defaults.Provider = c.Agents.Defaults.Provider
-	cfg.Agents.Defaults.ModelName = c.Agents.Defaults.ModelName
-	cfg.Agents.Defaults.ModelFallbacks = c.Agents.Defaults.ModelFallbacks
-
-	for _, m := range c.ModelList {
-		cfg.ModelList = append(cfg.ModelList, config.ModelConfig{
-			ModelName: m.ModelName,
-			Model:     m.Model,
-			APIBase:   m.APIBase,
-			APIKey:    m.APIKey,
-			Proxy:     m.Proxy,
-		})
-	}
-
-	cfg.Channels = c.Channels.ToStandardChannels()
-	cfg.Gateway = c.Gateway.ToStandardGateway()
-	cfg.Tools = c.Tools.ToStandardTools()
-
-	cfg.Agents.List = make([]config.AgentConfig, len(c.Agents.List))
-	for i, a := range c.Agents.List {
-		cfg.Agents.List[i] = config.AgentConfig{
-			ID:        a.ID,
-			Default:   a.Default,
-			Name:      a.Name,
-			Workspace: a.Workspace,
-			Skills:    a.Skills,
-		}
-		if a.Model != nil {
-			cfg.Agents.List[i].Model = &config.AgentModelConfig{
-				Primary:   a.Model.Primary,
-				Fallbacks: a.Model.Fallbacks,
+	testConfig := `{
+		"models": {
+			"providers": {
+				"anthropic": {
+					"api_key": "sk-ant-test",
+					"base_url": "https://api.anthropic.com",
+					"max_tokens": 4096
+				},
+				"openai": {
+					"api_key": "sk-test",
+					"base_url": "https://api.openai.com"
+				}
 			}
 		}
+	}`
+
+	err := os.WriteFile(configPath, []byte(testConfig), 0o644)
+	if err != nil {
+		t.Fatalf("failed to write test config: %v", err)
 	}
 
-	return cfg
-}
+	cfg, err := LoadOpenClawConfig(configPath)
+	if err != nil {
+		t.Fatalf("failed to load config: %v", err)
+	}
 
-func (c ChannelsConfig) ToStandardChannels() config.ChannelsConfig {
-	return config.ChannelsConfig{
-		WhatsApp: config.WhatsAppConfig{
-			Enabled:   c.WhatsApp.Enabled,
-			BridgeURL: c.WhatsApp.BridgeURL,
-		},
-		Telegram: config.TelegramConfig{
-			Enabled: c.Telegram.Enabled,
-			Token:   c.Telegram.Token,
-			Proxy:   c.Telegram.Proxy,
-		},
-		Feishu: config.FeishuConfig{
-			Enabled:           c.Feishu.Enabled,
-			AppID:             c.Feishu.AppID,
-			AppSecret:         c.Feishu.AppSecret,
-			EncryptKey:        c.Feishu.EncryptKey,
-			VerificationToken: c.Feishu.VerificationToken,
-		},
-		Discord: config.DiscordConfig{
-			Enabled:     c.Discord.Enabled,
-			Token:       c.Discord.Token,
-			MentionOnly: c.Discord.MentionOnly,
-		},
-		MaixCam: config.MaixCamConfig{
-			Enabled: c.MaixCam.Enabled,
-			Host:    c.MaixCam.Host,
-			Port:    c.MaixCam.Port,
-		},
-		QQ: config.QQConfig{
-			Enabled:   c.QQ.Enabled,
-			AppID:     c.QQ.AppID,
-			AppSecret: c.QQ.AppSecret,
-		},
-		DingTalk: config.DingTalkConfig{
-			Enabled:      c.DingTalk.Enabled,
-			ClientID:     c.DingTalk.ClientID,
-			ClientSecret: c.DingTalk.ClientSecret,
-		},
-		Slack: config.SlackConfig{
-			Enabled:  c.Slack.Enabled,
-			BotToken: c.Slack.BotToken,
-			AppToken: c.Slack.AppToken,
-		},
-		Matrix: config.MatrixConfig{
-			Enabled:      c.Matrix.Enabled,
-			Homeserver:   c.Matrix.Homeserver,
-			UserID:       c.Matrix.UserID,
-			AccessToken:  c.Matrix.AccessToken,
-			AllowFrom:    c.Matrix.AllowFrom,
-			JoinOnInvite: true,
-		},
-		LINE: config.LINEConfig{
-			Enabled:            c.LINE.Enabled,
-			ChannelSecret:      c.LINE.ChannelSecret,
-			ChannelAccessToken: c.LINE.ChannelAccessToken,
-			WebhookHost:        c.LINE.WebhookHost,
-			WebhookPort:        c.LINE.WebhookPort,
-			WebhookPath:        c.LINE.WebhookPath,
-		},
+	providers := GetProviderConfig(cfg.Models)
+	if len(providers) != 2 {
+		t.Errorf("expected 2 providers, got %d", len(providers))
+	}
+
+	if anthropic, ok := providers["anthropic"]; ok {
+		if anthropic.APIKey != "sk-ant-test" {
+			t.Errorf("expected anthropic api_key 'sk-ant-test', got '%s'", anthropic.APIKey)
+		}
+		if anthropic.BaseURL != "https://api.anthropic.com" {
+			t.Errorf("expected anthropic base_url 'https://api.anthropic.com', got '%s'", anthropic.BaseURL)
+		}
+	} else {
+		t.Error("anthropic provider not found")
+	}
+
+	if openai, ok := providers["openai"]; ok {
+		if openai.APIKey != "sk-test" {
+			t.Errorf("expected openai api_key 'sk-test', got '%s'", openai.APIKey)
+		}
+	} else {
+		t.Error("openai provider not found")
 	}
 }
 
-func (c GatewayConfig) ToStandardGateway() config.GatewayConfig {
-	return config.GatewayConfig{
-		Host: c.Host,
-		Port: c.Port,
+func TestConvertToPicoClaw(t *testing.T) {
+	tmpDir := t.TempDir()
+	configPath := filepath.Join(tmpDir, "openclaw.json")
+
+	testConfig := `{
+		"agents": {
+			"defaults": {
+				"model": {
+					"primary": "anthropic/claude-sonnet-4-20250514"
+				},
+				"workspace": "~/.openclaw/workspace"
+			},
+			"list": [
+				{
+					"id": "main",
+					"name": "Main Agent"
+				},
+				{
+					"id": "assistant",
+					"name": "Assistant",
+					"skills": ["skill1", "skill2"]
+				}
+			]
+		},
+		"channels": {
+			"telegram": {
+				"enabled": true,
+				"botToken": "test-token",
+				"allowFrom": ["user1", "user2"]
+			},
+			"discord": {
+				"enabled": false,
+				"token": "discord-token"
+			},
+			"whatsapp": {
+				"enabled": true,
+				"bridgeUrl": "http://localhost:3000"
+			},
+			"feishu": {
+				"enabled": true,
+				"appId": "app-id",
+				"appSecret": "app-secret",
+				"allowFrom": ["user3"]
+			},
+			"signal": {
+				"enabled": true
+			}
+		},
+		"models": {
+			"providers": {
+				"anthropic": {
+					"api_key": "sk-ant-test"
+				},
+				"openai": {
+					"api_key": "sk-test"
+				}
+			}
+		},
+		"skills": {
+			"entries": {
+				"skill1": {}
+			}
+		},
+		"memory": {"enabled": true},
+		"cron": {"enabled": true}
+	}`
+
+	err := os.WriteFile(configPath, []byte(testConfig), 0o644)
+	if err != nil {
+		t.Fatalf("failed to write test config: %v", err)
+	}
+
+	cfg, err := LoadOpenClawConfig(configPath)
+	if err != nil {
+		t.Fatalf("failed to load config: %v", err)
+	}
+
+	picoCfg, warnings, err := cfg.ConvertToPicoClaw("")
+	if err != nil {
+		t.Fatalf("failed to convert config: %v", err)
+	}
+
+	if picoCfg.Agents.Defaults.ModelName != "claude-sonnet-4-20250514" {
+		t.Errorf("expected model 'claude-sonnet-4-20250514', got '%s'", picoCfg.Agents.Defaults.ModelName)
+	}
+	if picoCfg.Agents.Defaults.Workspace != "~/.permaclaw/workspace" {
+		t.Errorf("expected workspace '~/.permaclaw/workspace', got '%s'", picoCfg.Agents.Defaults.Workspace)
+	}
+
+	if len(picoCfg.Agents.List) != 2 {
+		t.Errorf("expected 2 agents, got %d", len(picoCfg.Agents.List))
+	}
+	if picoCfg.Agents.List[0].ID != "main" {
+		t.Errorf("expected first agent id 'main', got '%s'", picoCfg.Agents.List[0].ID)
+	}
+	if picoCfg.Agents.List[1].Skills == nil || len(picoCfg.Agents.List[1].Skills) != 2 {
+		t.Errorf("expected 2 skills for assistant agent")
+	}
+
+	if !picoCfg.Channels.Telegram.Enabled {
+		t.Error("telegram should be enabled")
+	}
+	if picoCfg.Channels.Telegram.Token != "test-token" {
+		t.Errorf("expected telegram token 'test-token', got '%s'", picoCfg.Channels.Telegram.Token)
+	}
+
+	if picoCfg.Channels.WhatsApp.BridgeURL != "http://localhost:3000" {
+		t.Errorf("expected whatsapp bridge URL 'http://localhost:3000', got '%s'", picoCfg.Channels.WhatsApp.BridgeURL)
+	}
+
+	if picoCfg.Channels.Feishu.AppID != "app-id" {
+		t.Errorf("expected feishu app ID 'app-id', got '%s'", picoCfg.Channels.Feishu.AppID)
+	}
+
+	if len(picoCfg.ModelList) != 1 {
+		t.Errorf("expected 1 model config (no models.json provided), got %d", len(picoCfg.ModelList))
+	}
+
+	foundWarning := false
+	for _, w := range warnings {
+		if len(w) > 0 {
+			foundWarning = true
+			break
+		}
+	}
+	if !foundWarning {
+		t.Log("warnings should be generated for skills, memory, cron, and unsupported channels")
 	}
 }
 
-func (c ToolsConfig) ToStandardTools() config.ToolsConfig {
-	return config.ToolsConfig{
-		Web: config.WebToolsConfig{
-			Brave: config.BraveConfig{
-				Enabled:    c.Web.Brave.Enabled,
-				APIKey:     c.Web.Brave.APIKey,
-				APIKeys:    c.Web.Brave.APIKeys,
-				MaxResults: c.Web.Brave.MaxResults,
+func TestToStandardConfig_ExecAllowRemoteDefaultsTrue(t *testing.T) {
+	cfg := (&PermaClawConfig{
+		Tools: ToolsConfig{
+			Exec: ExecConfig{
+				EnableDenyPatterns: true,
 			},
-			Tavily: config.TavilyConfig{
-				Enabled:    c.Web.Tavily.Enabled,
-				APIKey:     c.Web.Tavily.APIKey,
-				BaseURL:    c.Web.Tavily.BaseURL,
-				MaxResults: c.Web.Tavily.MaxResults,
-			},
-			DuckDuckGo: config.DuckDuckGoConfig{
-				Enabled:    c.Web.DuckDuckGo.Enabled,
-				MaxResults: c.Web.DuckDuckGo.MaxResults,
-			},
-			Perplexity: config.PerplexityConfig{
-				Enabled:    c.Web.Perplexity.Enabled,
-				APIKey:     c.Web.Perplexity.APIKey,
-				MaxResults: c.Web.Perplexity.MaxResults,
-			},
-			Proxy: c.Web.Proxy,
 		},
-		Cron: config.CronToolsConfig{
-			ExecTimeoutMinutes: c.Cron.ExecTimeoutMinutes,
+	}).ToStandardConfig()
+
+	if !cfg.Tools.Exec.AllowRemote {
+		t.Fatal("ToStandardConfig() should preserve the default tools.exec.allow_remote=true")
+	}
+}
+
+func TestConvertToPicoClawWithQQAndDingTalk(t *testing.T) {
+	tmpDir := t.TempDir()
+	configPath := filepath.Join(tmpDir, "openclaw.json")
+
+	testConfig := `{
+		"agents": {
+			"defaults": {
+				"model": {
+					"primary": "anthropic/claude-sonnet-4-20250514"
+				}
+			}
 		},
-		Exec: config.ExecConfig{
-			EnableDenyPatterns: c.Exec.EnableDenyPatterns,
-			CustomDenyPatterns: c.Exec.CustomDenyPatterns,
-			AllowRemote:        config.DefaultConfig().Tools.Exec.AllowRemote,
+		"channels": {
+			"qq": {
+				"enabled": true,
+				"appId": "qq-app-id",
+				"appSecret": "qq-app-secret"
+			},
+			"dingtalk": {
+				"enabled": true,
+				"appId": "ding-app-id",
+				"appSecret": "ding-app-secret"
+			},
+			"maixcam": {
+				"enabled": true,
+				"host": "192.168.1.100",
+				"port": 9000
+			},
+			"slack": {
+				"enabled": true,
+				"botToken": "xoxb-test",
+				"appToken": "xapp-test"
+			}
+		}
+	}`
+
+	err := os.WriteFile(configPath, []byte(testConfig), 0o644)
+	if err != nil {
+		t.Fatalf("failed to write test config: %v", err)
+	}
+
+	cfg, err := LoadOpenClawConfig(configPath)
+	if err != nil {
+		t.Fatalf("failed to load config: %v", err)
+	}
+
+	picoCfg, _, err := cfg.ConvertToPicoClaw("")
+	if err != nil {
+		t.Fatalf("failed to convert config: %v", err)
+	}
+
+	if !picoCfg.Channels.QQ.Enabled {
+		t.Error("qq should be enabled")
+	}
+	if picoCfg.Channels.QQ.AppID != "qq-app-id" {
+		t.Errorf("expected qq app ID 'qq-app-id', got '%s'", picoCfg.Channels.QQ.AppID)
+	}
+
+	if !picoCfg.Channels.DingTalk.Enabled {
+		t.Error("dingtalk should be enabled")
+	}
+	if picoCfg.Channels.DingTalk.ClientID != "ding-app-id" {
+		t.Errorf("expected dingtalk client ID 'ding-app-id', got '%s'", picoCfg.Channels.DingTalk.ClientID)
+	}
+
+	if !picoCfg.Channels.MaixCam.Enabled {
+		t.Error("maixcam should be enabled")
+	}
+	if picoCfg.Channels.MaixCam.Host != "192.168.1.100" {
+		t.Errorf("expected maixcam host '192.168.1.100', got '%s'", picoCfg.Channels.MaixCam.Host)
+	}
+	if picoCfg.Channels.MaixCam.Port != 9000 {
+		t.Errorf("expected maixcam port 9000, got %d", picoCfg.Channels.MaixCam.Port)
+	}
+
+	if !picoCfg.Channels.Slack.Enabled {
+		t.Error("slack should be enabled")
+	}
+	if picoCfg.Channels.Slack.BotToken != "xoxb-test" {
+		t.Errorf("expected slack bot token 'xoxb-test', got '%s'", picoCfg.Channels.Slack.BotToken)
+	}
+	if picoCfg.Channels.Slack.AppToken != "xapp-test" {
+		t.Errorf("expected slack app token 'xapp-test', got '%s'", picoCfg.Channels.Slack.AppToken)
+	}
+}
+
+func TestConvertToPicoClawWithMatrix(t *testing.T) {
+	tmpDir := t.TempDir()
+	configPath := filepath.Join(tmpDir, "openclaw.json")
+
+	testConfig := `{
+		"channels": {
+			"matrix": {
+				"enabled": true,
+				"homeserver": "https://matrix.example.com",
+				"userId": "@bot:matrix.example.com",
+				"accessToken": "syt_test_token",
+				"allowFrom": ["@alice:matrix.example.com"]
+			}
+		}
+	}`
+
+	err := os.WriteFile(configPath, []byte(testConfig), 0o644)
+	if err != nil {
+		t.Fatalf("failed to write test config: %v", err)
+	}
+
+	cfg, err := LoadOpenClawConfig(configPath)
+	if err != nil {
+		t.Fatalf("failed to load config: %v", err)
+	}
+
+	picoCfg, warnings, err := cfg.ConvertToPicoClaw("")
+	if err != nil {
+		t.Fatalf("failed to convert config: %v", err)
+	}
+
+	if !picoCfg.Channels.Matrix.Enabled {
+		t.Error("matrix should be enabled")
+	}
+	if picoCfg.Channels.Matrix.Homeserver != "https://matrix.example.com" {
+		t.Errorf("expected matrix homeserver, got %q", picoCfg.Channels.Matrix.Homeserver)
+	}
+	if picoCfg.Channels.Matrix.UserID != "@bot:matrix.example.com" {
+		t.Errorf("expected matrix user_id, got %q", picoCfg.Channels.Matrix.UserID)
+	}
+	if picoCfg.Channels.Matrix.AccessToken != "syt_test_token" {
+		t.Errorf("expected matrix access_token, got %q", picoCfg.Channels.Matrix.AccessToken)
+	}
+	if len(picoCfg.Channels.Matrix.AllowFrom) != 1 ||
+		picoCfg.Channels.Matrix.AllowFrom[0] != "@alice:matrix.example.com" {
+		t.Errorf("unexpected matrix allow_from: %#v", picoCfg.Channels.Matrix.AllowFrom)
+	}
+
+	for _, w := range warnings {
+		if strings.Contains(w, "Channel 'matrix'") {
+			t.Fatalf("matrix should no longer be reported as unsupported, warning=%q", w)
+		}
+	}
+}
+
+func TestConvertToPicoClawWithMatrixDisabled(t *testing.T) {
+	tmpDir := t.TempDir()
+	configPath := filepath.Join(tmpDir, "openclaw.json")
+
+	testConfig := `{
+		"channels": {
+			"matrix": {
+				"enabled": false,
+				"homeserver": "https://matrix.example.com",
+				"userId": "@bot:matrix.example.com",
+				"accessToken": "syt_test_token"
+			}
+		}
+	}`
+
+	err := os.WriteFile(configPath, []byte(testConfig), 0o644)
+	if err != nil {
+		t.Fatalf("failed to write test config: %v", err)
+	}
+
+	cfg, err := LoadOpenClawConfig(configPath)
+	if err != nil {
+		t.Fatalf("failed to load config: %v", err)
+	}
+
+	picoCfg, _, err := cfg.ConvertToPicoClaw("")
+	if err != nil {
+		t.Fatalf("failed to convert config: %v", err)
+	}
+
+	if picoCfg.Channels.Matrix.Enabled {
+		t.Error("matrix should respect enabled=false from source config")
+	}
+}
+
+func TestOpenClawAgentModel(t *testing.T) {
+	model := &OpenClawAgentModel{
+		Primary:   strPtr("anthropic/claude-3-opus"),
+		Fallbacks: []string{"claude-3-sonnet", "claude-3-haiku"},
+	}
+
+	primary := model.GetPrimary()
+	if primary != "anthropic/claude-3-opus" {
+		t.Errorf("expected primary 'anthropic/claude-3-opus', got '%s'", primary)
+	}
+
+	fallbacks := model.GetFallbacks()
+	if len(fallbacks) != 2 {
+		t.Errorf("expected 2 fallbacks, got %d", len(fallbacks))
+	}
+
+	model2 := &OpenClawAgentModel{
+		Simple: "claude-3-opus",
+	}
+
+	primary2 := model2.GetPrimary()
+	if primary2 != "claude-3-opus" {
+		t.Errorf("expected primary 'claude-3-opus' from Simple, got '%s'", primary2)
+	}
+}
+
+func TestChannelEnabled(t *testing.T) {
+	cfg := &OpenClawConfig{
+		Channels: &OpenClawChannels{
+			Telegram: &OpenClawTelegramConfig{
+				Enabled: boolPtr(true),
+			},
+			Discord: &OpenClawDiscordConfig{
+				Enabled: boolPtr(false),
+			},
+			Slack: &OpenClawSlackConfig{
+				Enabled: boolPtr(true),
+			},
 		},
 	}
+
+	if !cfg.IsChannelEnabled("telegram") {
+		t.Error("telegram should be enabled")
+	}
+	if cfg.IsChannelEnabled("discord") {
+		t.Error("discord should be disabled")
+	}
+	if !cfg.IsChannelEnabled("slack") {
+		t.Error("slack should be enabled (explicitly set)")
+	}
+	if !cfg.IsChannelEnabled("matrix") {
+		t.Error("matrix should be enabled (nil config defaults to enabled)")
+	}
+	if cfg.IsChannelEnabled("line") {
+		t.Error("line should return false (not in switch cases)")
+	}
+}
+
+func TestGetDefaultModel(t *testing.T) {
+	cfg := &OpenClawConfig{
+		Agents: &OpenClawAgents{
+			Defaults: &OpenClawAgentDefaults{
+				Model: &OpenClawAgentModel{
+					Primary: strPtr("openai/gpt-4"),
+				},
+			},
+		},
+	}
+
+	provider, model := cfg.GetDefaultModel()
+	if provider != "openai" {
+		t.Errorf("expected provider 'openai', got '%s'", provider)
+	}
+	if model != "gpt-4" {
+		t.Errorf("expected model 'gpt-4', got '%s'", model)
+	}
+}
+
+func TestGetDefaultModelWithNoDefaults(t *testing.T) {
+	cfg := &OpenClawConfig{}
+
+	provider, model := cfg.GetDefaultModel()
+	if provider != "anthropic" {
+		t.Errorf("expected default provider 'anthropic', got '%s'", provider)
+	}
+	if model != "claude-sonnet-4-20250514" {
+		t.Errorf("expected default model 'claude-sonnet-4-20250514', got '%s'", model)
+	}
+}
+
+func TestHasFunctions(t *testing.T) {
+	cfg := &OpenClawConfig{
+		Skills:  &OpenClawSkills{Entries: map[string]json.RawMessage{"skill1": nil}},
+		Memory:  json.RawMessage(`{"enabled": true}`),
+		Cron:    json.RawMessage(`{"enabled": true}`),
+		Hooks:   json.RawMessage(`{"enabled": true}`),
+		Session: json.RawMessage(`{"enabled": true}`),
+		Auth:    &OpenClawAuth{Profiles: json.RawMessage(`{"profile1": {}}`)},
+	}
+
+	if !cfg.HasSkills() {
+		t.Error("should have skills")
+	}
+	if !cfg.HasMemory() {
+		t.Error("should have memory")
+	}
+	if !cfg.HasCron() {
+		t.Error("should have cron")
+	}
+	if !cfg.HasHooks() {
+		t.Error("should have hooks")
+	}
+	if !cfg.HasSession() {
+		t.Error("should have session")
+	}
+	if !cfg.HasAuthProfiles() {
+		t.Error("should have auth profiles")
+	}
+
+	cfg2 := &OpenClawConfig{}
+	if cfg2.HasSkills() {
+		t.Error("should not have skills")
+	}
+	if cfg2.HasMemory() {
+		t.Error("should not have memory")
+	}
+}
+
+func TestLoadOpenClawConfigFromDir(t *testing.T) {
+	tmpDir := t.TempDir()
+	configPath := filepath.Join(tmpDir, "openclaw.json")
+
+	testConfig := `{"agents": {}}`
+	err := os.WriteFile(configPath, []byte(testConfig), 0o644)
+	if err != nil {
+		t.Fatalf("failed to write test config: %v", err)
+	}
+
+	cfg, err := LoadOpenClawConfigFromDir(tmpDir)
+	if err != nil {
+		t.Fatalf("failed to load config from dir: %v", err)
+	}
+
+	if cfg.Agents == nil {
+		t.Error("agents should not be nil")
+	}
+
+	_, err = LoadOpenClawConfigFromDir("/nonexistent/dir")
+	if err == nil {
+		t.Error("should return error for nonexistent dir")
+	}
+}
+
+func TestToStandardConfig(t *testing.T) {
+	picoCfg := &PermaClawConfig{
+		Agents: AgentsConfig{
+			Defaults: AgentDefaults{
+				Provider:  "anthropic",
+				ModelName: "claude-sonnet-4-20250514",
+				Workspace: "~/.permaclaw/workspace",
+			},
+			List: []AgentConfig{
+				{
+					ID:      "main",
+					Name:    "Main Agent",
+					Default: true,
+				},
+			},
+		},
+		ModelList: []ModelConfig{
+			{
+				ModelName: "claude-sonnet-4-20250514",
+				Model:     "anthropic/claude-sonnet-4-20250514",
+				APIKey:    "sk-ant-test",
+			},
+		},
+		Channels: ChannelsConfig{
+			Telegram: TelegramConfig{
+				Enabled:   true,
+				Token:     "test-token",
+				AllowFrom: []string{"user1"},
+			},
+			WhatsApp: WhatsAppConfig{
+				Enabled:   true,
+				BridgeURL: "http://localhost:3000",
+			},
+		},
+		Gateway: GatewayConfig{
+			Host: "0.0.0.0",
+			Port: 8080,
+		},
+	}
+
+	stdCfg := picoCfg.ToStandardConfig()
+
+	if stdCfg.Agents.Defaults.Provider != "anthropic" {
+		t.Errorf("expected provider 'anthropic', got '%s'", stdCfg.Agents.Defaults.Provider)
+	}
+	if stdCfg.Agents.Defaults.ModelName != "claude-sonnet-4-20250514" {
+		t.Errorf("expected model name 'claude-sonnet-4-20250514', got '%s'", stdCfg.Agents.Defaults.ModelName)
+	}
+	if stdCfg.Agents.Defaults.Workspace != "~/.permaclaw/workspace" {
+		t.Errorf("expected workspace '~/.permaclaw/workspace', got '%s'", stdCfg.Agents.Defaults.Workspace)
+	}
+
+	if len(stdCfg.Agents.List) != 1 {
+		t.Errorf("expected 1 agent, got %d", len(stdCfg.Agents.List))
+	}
+	if stdCfg.Agents.List[0].ID != "main" {
+		t.Errorf("expected agent id 'main', got '%s'", stdCfg.Agents.List[0].ID)
+	}
+
+	foundModel := false
+	var foundAPIKey string
+	for _, m := range stdCfg.ModelList {
+		if m.ModelName == "claude-sonnet-4-20250514" {
+			foundModel = true
+			foundAPIKey = m.APIKey
+			break
+		}
+	}
+	if !foundModel {
+		t.Error("expected to find claude-sonnet-4-20250514 model config")
+	}
+	if foundAPIKey != "sk-ant-test" {
+		t.Errorf("expected api key 'sk-ant-test', got '%s'", foundAPIKey)
+	}
+
+	if !stdCfg.Channels.Telegram.Enabled {
+		t.Error("telegram should be enabled")
+	}
+	if stdCfg.Channels.Telegram.Token != "test-token" {
+		t.Errorf("expected token 'test-token', got '%s'", stdCfg.Channels.Telegram.Token)
+	}
+
+	if stdCfg.Gateway.Port != 8080 {
+		t.Errorf("expected gateway port 8080, got %d", stdCfg.Gateway.Port)
+	}
+}
+
+func TestLoadProviderConfigFromAgentsDir(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	agentsDir := filepath.Join(tmpDir, "agents", "main", "agent")
+	err := os.MkdirAll(agentsDir, 0o755)
+	if err != nil {
+		t.Fatalf("failed to create agents dir: %v", err)
+	}
+
+	modelsJSON := `{
+		"providers": {
+			"anthropic": {
+				"baseUrl": "https://api.anthropic.com",
+				"api": "anthropic",
+				"apiKey": "sk-ant-from-models",
+				"models": [
+					{
+						"id": "claude-sonnet-4-20250514",
+						"name": "Claude Sonnet 4"
+					}
+				]
+			},
+			"openai": {
+				"baseUrl": "https://api.openai.com",
+				"api": "openai",
+				"apiKey": "sk-from-models",
+				"models": [
+					{
+						"id": "gpt-4o",
+						"name": "GPT-4o"
+					}
+				]
+			},
+			"zhipu": {
+				"baseUrl": "https://open.bigmodel.cn/api/paas/v4",
+				"api": "openai",
+				"apiKey": "zhipu-key",
+				"models": []
+			}
+		}
+	}`
+
+	err = os.WriteFile(filepath.Join(agentsDir, "models.json"), []byte(modelsJSON), 0o644)
+	if err != nil {
+		t.Fatalf("failed to write models.json: %v", err)
+	}
+
+	providers := GetProviderConfigFromDir(tmpDir)
+	if len(providers) != 3 {
+		t.Errorf("expected 3 providers, got %d", len(providers))
+	}
+
+	if anthropic, ok := providers["anthropic"]; ok {
+		if anthropic.ApiKey != "sk-ant-from-models" {
+			t.Errorf("expected anthropic apiKey 'sk-ant-from-models', got '%s'", anthropic.ApiKey)
+		}
+		if anthropic.BaseUrl != "https://api.anthropic.com" {
+			t.Errorf("expected anthropic baseUrl 'https://api.anthropic.com', got '%s'", anthropic.BaseUrl)
+		}
+	} else {
+		t.Error("anthropic provider not found")
+	}
+
+	if openai, ok := providers["openai"]; ok {
+		if openai.ApiKey != "sk-from-models" {
+			t.Errorf("expected openai apiKey 'sk-from-models', got '%s'", openai.ApiKey)
+		}
+		if openai.BaseUrl != "https://api.openai.com" {
+			t.Errorf("expected openai baseUrl 'https://api.openai.com', got '%s'", openai.BaseUrl)
+		}
+	} else {
+		t.Error("openai provider not found")
+	}
+
+	if zhipu, ok := providers["zhipu"]; ok {
+		if zhipu.ApiKey != "zhipu-key" {
+			t.Errorf("expected zhipu apiKey 'zhipu-key', got '%s'", zhipu.ApiKey)
+		}
+		if zhipu.BaseUrl != "https://open.bigmodel.cn/api/paas/v4" {
+			t.Errorf("expected zhipu baseUrl 'https://open.bigmodel.cn/api/paas/v4', got '%s'", zhipu.BaseUrl)
+		}
+	} else {
+		t.Error("zhipu provider not found")
+	}
+}
+
+func TestGetProviderConfigFromDirNotExist(t *testing.T) {
+	providers := GetProviderConfigFromDir("/nonexistent/path")
+	if len(providers) != 0 {
+		t.Errorf("expected 0 providers for nonexistent path, got %d", len(providers))
+	}
+}
+
+func strPtr(s string) *string {
+	return &s
+}
+
+func boolPtr(b bool) *bool {
+	return &b
 }

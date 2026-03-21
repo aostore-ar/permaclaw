@@ -1,0 +1,33 @@
+package aomem
+
+import (
+    "context"
+    "encoding/json"
+    "testing"
+
+    "github.com/everFinance/goar"
+    "github.com/stretchr/testify/assert"
+    "github.com/stretchr/testify/require"
+)
+
+func TestMainProcessClient_ListProcesses(t *testing.T) {
+    // Create a mock AOClient that returns a predefined result
+    mockClient := &mockAOClient{
+        sendMessageFunc: func(ctx context.Context, target, action, data string) (*MessageResult, error) {
+            procs := []ProcessMeta{
+                {ID: "p1", Name: "test", Type: "memory", Public: true},
+            }
+            dataBytes, _ := json.Marshal(procs)
+            return &MessageResult{Output: string(dataBytes)}, nil
+        },
+    }
+    client := &MainProcessClient{
+        processID: "main",
+        client:    mockClient,
+    }
+    ctx := context.Background()
+    procs, err := client.ListProcesses(ctx, "memory")
+    require.NoError(t, err)
+    assert.Len(t, procs, 1)
+    assert.Equal(t, "p1", procs[0].ID)
+}

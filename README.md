@@ -1,4 +1,4 @@
-# 🦞 PermaClaw – Your Immortal Personal AI Assistant that Never Forgets
+#  🧬 PermaClaw – Your Immortal Personal AI Assistant that Never Forgets
 
 **PermaClaw** is an ultra‑lightweight, self‑hostable AI assistant with **permanent, wallet‑recoverable memory**.  
 It combines a minimal Go agent, a rich web UI, a decentralized app store (aoStore), and permanent storage on the AO network.

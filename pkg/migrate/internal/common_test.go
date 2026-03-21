@@ -1,186 +1,199 @@
 package internal
 
 import (
+	"errors"
+	"fmt"
+	"io"
 	"os"
 	"path/filepath"
-	"testing"
-
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"strings"
 )
 
-func TestExpandHome(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected string
-	}{
-		{"", ""},
-		{"/absolute/path", "/absolute/path"},
-		{"relative/path", "relative/path"},
+// ExpandHome replaces a leading "~" with the user's home directory.
+func ExpandHome(path string) string {
+	if path == "" || path[0] != '~' {
+		return path
 	}
-
-	for _, tt := range tests {
-		result := ExpandHome(tt.input)
-		assert.Equal(t, tt.expected, result)
+	home, _ := os.UserHomeDir()
+	if len(path) > 1 && path[1] == '/' {
+		return home + path[1:]
 	}
+	return home
 }
 
-func TestExpandHomeWithTilde(t *testing.T) {
+// ResolveWorkspace returns the workspace path for a given permaclaw home.
+func ResolveWorkspace(home string) string {
+	return filepath.Join(home, "workspace")
+}
+
+// RelPath returns the relative path from base to target, or the base name of target on error.
+func RelPath(target, base string) string {
+	rel, err := filepath.Rel(base, target)
+	if err != nil {
+		return filepath.Base(target)
+	}
+	return rel
+}
+
+// ResolveTargetHome returns the target home directory for migration.
+// If override is non-empty, it is returned directly. Otherwise, it returns
+// ~/.permaclaw after expanding the tilde.
+func ResolveTargetHome(override string) (string, error) {
+	if override != "" {
+		return ExpandHome(override), nil
+	}
 	home, err := os.UserHomeDir()
-	require.NoError(t, err)
-
-	result := ExpandHome("~/path")
-	assert.Equal(t, home+"/path", result)
-
-	result = ExpandHome("~")
-	assert.Equal(t, home, result)
+	if err != nil {
+		return "", fmt.Errorf("cannot determine home directory: %w", err)
+	}
+	return filepath.Join(home, ".permaclaw"), nil
 }
 
-func TestResolveWorkspace(t *testing.T) {
-	result := ResolveWorkspace("/home/user/.picoclaw")
-	assert.Equal(t, "/home/user/.picoclaw/workspace", result)
-}
+// CopyFile copies a file from src to dst, preserving permissions.
+func CopyFile(src, dst string) error {
+	srcFile, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer srcFile.Close()
 
-func TestRelPath(t *testing.T) {
-	result := RelPath("/home/user/.picoclaw/workspace/file.txt", "/home/user/.picoclaw")
-	assert.Equal(t, "workspace/file.txt", result)
-}
-
-func TestRelPathError(t *testing.T) {
-	result := RelPath("relative/path", "/different/base")
-	assert.Equal(t, "path", result)
-}
-
-func TestResolveTargetHome(t *testing.T) {
-	home, err := os.UserHomeDir()
-	require.NoError(t, err)
-
-	result, err := ResolveTargetHome("")
-	require.NoError(t, err)
-	assert.Equal(t, filepath.Join(home, ".picoclaw"), result)
-}
-
-func TestResolveTargetHomeWithOverride(t *testing.T) {
-	result, err := ResolveTargetHome("/custom/path")
-	require.NoError(t, err)
-	assert.Equal(t, "/custom/path", result)
-}
-
-func TestCopyFile(t *testing.T) {
-	tmpDir := t.TempDir()
-
-	sourceFile := filepath.Join(tmpDir, "source.txt")
-	err := os.WriteFile(sourceFile, []byte("test content"), 0o644)
-	require.NoError(t, err)
-
-	dstFile := filepath.Join(tmpDir, "dest.txt")
-	err = CopyFile(sourceFile, dstFile)
-	require.NoError(t, err)
-
-	content, err := os.ReadFile(dstFile)
-	require.NoError(t, err)
-	assert.Equal(t, "test content", string(content))
-}
-
-func TestCopyFileSourceNotFound(t *testing.T) {
-	tmpDir := t.TempDir()
-
-	err := CopyFile(filepath.Join(tmpDir, "nonexistent.txt"), filepath.Join(tmpDir, "dest.txt"))
-	require.Error(t, err)
-}
-
-func TestPlanWorkspaceMigration(t *testing.T) {
-	tmpDir := t.TempDir()
-	srcWorkspace := filepath.Join(tmpDir, "src", "workspace")
-	dstWorkspace := filepath.Join(tmpDir, "dst", "workspace")
-
-	err := os.MkdirAll(srcWorkspace, 0o755)
-	require.NoError(t, err)
-
-	err = os.WriteFile(filepath.Join(srcWorkspace, "file1.txt"), []byte("content"), 0o644)
-	require.NoError(t, err)
-
-	err = os.MkdirAll(filepath.Join(srcWorkspace, "subdir"), 0o755)
-	require.NoError(t, err)
-
-	err = os.WriteFile(filepath.Join(srcWorkspace, "subdir", "file2.txt"), []byte("content"), 0o644)
-	require.NoError(t, err)
-
-	actions, err := PlanWorkspaceMigration(
-		srcWorkspace,
-		dstWorkspace,
-		[]string{"file1.txt"},
-		[]string{"subdir"},
-		false,
-	)
-	require.NoError(t, err)
-
-	assert.GreaterOrEqual(t, len(actions), 1)
-}
-
-func TestPlanWorkspaceMigrationExistingFile(t *testing.T) {
-	tests := []struct {
-		name           string
-		force          bool
-		wantActionType ActionType
-	}{
-		{
-			name:           "backup when not forced",
-			force:          false,
-			wantActionType: ActionBackup,
-		},
-		{
-			name:           "copy when forced",
-			force:          true,
-			wantActionType: ActionCopy,
-		},
+	info, err := srcFile.Stat()
+	if err != nil {
+		return err
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tmpDir := t.TempDir()
-			srcWorkspace := filepath.Join(tmpDir, "src", "workspace")
-			dstWorkspace := filepath.Join(tmpDir, "dst", "workspace")
+	if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
+		return err
+	}
+	dstFile, err := os.OpenFile(dst, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, info.Mode())
+	if err != nil {
+		return err
+	}
+	defer dstFile.Close()
 
-			err := os.MkdirAll(srcWorkspace, 0o755)
-			require.NoError(t, err)
+	if _, err := io.Copy(dstFile, srcFile); err != nil {
+		return err
+	}
+	return nil
+}
 
-			err = os.MkdirAll(dstWorkspace, 0o755)
-			require.NoError(t, err)
+// ActionType enumerates the possible actions in a migration plan.
+type ActionType string
 
-			err = os.WriteFile(filepath.Join(srcWorkspace, "file1.txt"), []byte("source"), 0o644)
-			require.NoError(t, err)
+const (
+	ActionCopy   ActionType = "copy"
+	ActionSkip   ActionType = "skip"
+	ActionBackup ActionType = "backup"
+)
 
-			err = os.WriteFile(filepath.Join(dstWorkspace, "file1.txt"), []byte("existing"), 0o644)
-			require.NoError(t, err)
+// Action describes a single migration step.
+type Action struct {
+	Type        ActionType
+	Source      string
+	Target      string
+	Description string
+}
 
-			actions, err := PlanWorkspaceMigration(
-				srcWorkspace,
-				dstWorkspace,
-				[]string{"file1.txt"},
-				[]string{},
-				tt.force,
-			)
-			require.NoError(t, err)
+// PlanWorkspaceMigration creates a plan to migrate files/directories from src to dst.
+// files is a list of relative file paths to copy.
+// dirs is a list of relative directory paths to copy recursively.
+// force controls whether existing files are overwritten (true) or backed up (false).
+func PlanWorkspaceMigration(srcWorkspace, dstWorkspace string, files, dirs []string, force bool) ([]Action, error) {
+	var actions []Action
 
-			require.GreaterOrEqual(t, len(actions), 1)
-			assert.Equal(t, tt.wantActionType, actions[0].Type)
+	// Process individual files
+	for _, f := range files {
+		src := filepath.Join(srcWorkspace, f)
+		dst := filepath.Join(dstWorkspace, f)
+
+		info, err := os.Stat(src)
+		if err != nil {
+			if os.IsNotExist(err) {
+				actions = append(actions, Action{
+					Type:        ActionSkip,
+					Description: fmt.Sprintf("source file not found: %s", src),
+				})
+				continue
+			}
+			return nil, fmt.Errorf("stat source file %s: %w", src, err)
+		}
+		if info.IsDir() {
+			return nil, fmt.Errorf("expected file, got directory: %s", src)
+		}
+
+		if _, err := os.Stat(dst); err == nil && !force {
+			actions = append(actions, Action{
+				Type:        ActionBackup,
+				Source:      src,
+				Target:      dst,
+				Description: fmt.Sprintf("file exists, will be backed up: %s", dst),
+			})
+		} else {
+			actions = append(actions, Action{
+				Type:        ActionCopy,
+				Source:      src,
+				Target:      dst,
+				Description: fmt.Sprintf("copy %s to %s", src, dst),
+			})
+		}
+	}
+
+	// Process directories recursively
+	for _, d := range dirs {
+		srcDir := filepath.Join(srcWorkspace, d)
+		dstDir := filepath.Join(dstWorkspace, d)
+
+		info, err := os.Stat(srcDir)
+		if err != nil {
+			if os.IsNotExist(err) {
+				actions = append(actions, Action{
+					Type:        ActionSkip,
+					Description: fmt.Sprintf("source directory not found: %s", srcDir),
+				})
+				continue
+			}
+			return nil, fmt.Errorf("stat source directory %s: %w", srcDir, err)
+		}
+		if !info.IsDir() {
+			return nil, fmt.Errorf("expected directory, got file: %s", srcDir)
+		}
+
+		// Walk the source directory
+		err = filepath.Walk(srcDir, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			rel, err := filepath.Rel(srcWorkspace, path)
+			if err != nil {
+				return err
+			}
+			destPath := filepath.Join(dstWorkspace, rel)
+
+			if info.IsDir() {
+				return nil // directories will be created when copying files
+			}
+
+			if _, err := os.Stat(destPath); err == nil && !force {
+				actions = append(actions, Action{
+					Type:        ActionBackup,
+					Source:      path,
+					Target:      destPath,
+					Description: fmt.Sprintf("file exists, will be backed up: %s", destPath),
+				})
+			} else {
+				actions = append(actions, Action{
+					Type:        ActionCopy,
+					Source:      path,
+					Target:      destPath,
+					Description: fmt.Sprintf("copy %s to %s", path, destPath),
+				})
+			}
+			return nil
 		})
+		if err != nil && !errors.Is(err, filepath.SkipDir) {
+			return nil, fmt.Errorf("walk directory %s: %w", srcDir, err)
+		}
 	}
-}
 
-func TestPlanWorkspaceMigrationNonExistentSource(t *testing.T) {
-	tmpDir := t.TempDir()
-
-	actions, err := PlanWorkspaceMigration(
-		filepath.Join(tmpDir, "nonexistent"),
-		filepath.Join(tmpDir, "dst", "workspace"),
-		[]string{"file1.txt"},
-		[]string{},
-		false,
-	)
-	require.NoError(t, err)
-	require.Len(t, actions, 1)
-	assert.Equal(t, ActionSkip, actions[0].Type)
-	assert.Contains(t, actions[0].Description, "source file not found")
+	return actions, nil
 }

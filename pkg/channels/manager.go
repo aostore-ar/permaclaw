@@ -1,8 +1,8 @@
-// PicoClaw - Ultra-lightweight personal AI agent
-// Inspired by and based on nanobot: https://github.com/HKUDS/nanobot
+// PermaClaw - Ultra-lightweight personal AI agent with permanent memory
+// Based on and inspired by PicoClaw: https://github.com/sipeed/picoclaw
 // License: MIT
 //
-// Copyright (c) 2026 PicoClaw contributors
+// Copyright (c) 2026 PermaClaw contributors
 
 package channels
 
@@ -17,12 +17,12 @@ import (
 
 	"golang.org/x/time/rate"
 
-	"github.com/sipeed/picoclaw/pkg/bus"
-	"github.com/sipeed/picoclaw/pkg/config"
-	"github.com/sipeed/picoclaw/pkg/constants"
-	"github.com/sipeed/picoclaw/pkg/health"
-	"github.com/sipeed/picoclaw/pkg/logger"
-	"github.com/sipeed/picoclaw/pkg/media"
+	"github.com/aostore-ar/permaclaw/pkg/bus"
+	"github.com/aostore-ar/permaclaw/pkg/config"
+	"github.com/aostore-ar/permaclaw/pkg/constants"
+	"github.com/aostore-ar/permaclaw/pkg/health"
+	"github.com/aostore-ar/permaclaw/pkg/logger"
+	"github.com/aostore-ar/permaclaw/pkg/media"
 )
 
 const (

@@ -1,7 +1,7 @@
 # ============================================================
-# Stage 1: Build the picoclaw binary
+# Stage 1: Build the permaclaw binary
 # ============================================================
-FROM golang:1.26.0-alpine AS builder
+FROM golang:1.25-alpine AS builder
 
 RUN apk add --no-cache git make
 
@@ -34,11 +34,11 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
   ln -s /root/.local/bin/uvx /usr/local/bin/uvx && \
   uv --version
 
-# Copy binary
-COPY --from=builder /src/build/picoclaw /usr/local/bin/picoclaw
+# Copy binary (adjust path if your make build outputs differently)
+COPY --from=builder /src/build/permaclaw /usr/local/bin/permaclaw
 
-# Create picoclaw home directory
-RUN /usr/local/bin/picoclaw onboard
+# Create permaclaw home directory
+RUN /usr/local/bin/permaclaw onboard
 
-ENTRYPOINT ["picoclaw"]
+ENTRYPOINT ["permaclaw"]
 CMD ["gateway"]

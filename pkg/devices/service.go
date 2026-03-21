@@ -6,12 +6,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/sipeed/picoclaw/pkg/bus"
-	"github.com/sipeed/picoclaw/pkg/constants"
-	"github.com/sipeed/picoclaw/pkg/devices/events"
-	"github.com/sipeed/picoclaw/pkg/devices/sources"
-	"github.com/sipeed/picoclaw/pkg/logger"
-	"github.com/sipeed/picoclaw/pkg/state"
+	"github.com/aostore-ar/permaclaw/pkg/bus"
+	"github.com/aostore-ar/permaclaw/pkg/constants"
+	"github.com/aostore-ar/permaclaw/pkg/devices/events"
+	"github.com/aostore-ar/permaclaw/pkg/devices/sources"
+	"github.com/aostore-ar/permaclaw/pkg/logger"
+	"github.com/aostore-ar/permaclaw/pkg/state"
 )
 
 type Service struct {
@@ -34,7 +34,7 @@ func NewService(cfg Config, stateMgr *state.Manager) *Service {
 	s := &Service{
 		state:   stateMgr,
 		enabled: cfg.Enabled,
-		sources: make([]EventSource, 0),
+		sources: make([]events.EventSource, 0),
 	}
 
 	if cfg.Enabled && cfg.MonitorUSB {

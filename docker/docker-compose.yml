@@ -1,29 +1,30 @@
 services:
   # ─────────────────────────────────────────────
-  # PicoClaw Agent (one-shot query)
-  #   docker compose -f docker/docker-compose.yml run --rm picoclaw-agent -m "Hello"
+  # PermaClaw Agent (one-shot query)
+  #   docker compose -f docker/docker-compose.yml run --rm permaclaw-agent -m "Hello"
   # ─────────────────────────────────────────────
-  picoclaw-agent:
-    image: docker.io/sipeed/picoclaw:latest
-    container_name: picoclaw-agent
+  permaclaw-agent:
+    # Use a published PermaClaw image; if you build locally, comment out `image` and uncomment `build`.
+    image: docker.io/aostore/permaclaw:latest
+    container_name: permaclaw-agent
     profiles:
       - agent
     # Uncomment to access host network; leave commented unless needed.
     #extra_hosts:
     #  - "host.docker.internal:host-gateway"
     volumes:
-      - ./data:/root/.picoclaw
-    entrypoint: ["picoclaw", "agent"]
+      - ./data:/root/.permaclaw
+    entrypoint: ["permaclaw", "agent"]
     stdin_open: true
     tty: true
 
   # ─────────────────────────────────────────────
-  # PicoClaw Gateway (Long-running Bot)
+  # PermaClaw Gateway (Long-running Bot)
   #   docker compose -f docker/docker-compose.yml --profile gateway up
   # ─────────────────────────────────────────────
-  picoclaw-gateway:
-    image: docker.io/sipeed/picoclaw:latest
-    container_name: picoclaw-gateway
+  permaclaw-gateway:
+    image: docker.io/aostore/permaclaw:latest
+    container_name: permaclaw-gateway
     restart: on-failure
     profiles:
       - gateway
@@ -31,22 +32,22 @@ services:
     #extra_hosts:
     #  - "host.docker.internal:host-gateway"
     volumes:
-      - ./data:/root/.picoclaw
+      - ./data:/root/.permaclaw
 
   # ─────────────────────────────────────────────
-  # PicoClaw Launcher (Web Console + Gateway)
+  # PermaClaw Launcher (Web Console + Gateway)
   #   docker compose -f docker/docker-compose.yml --profile launcher up
   # ─────────────────────────────────────────────
-  picoclaw-launcher:
-    image: docker.io/sipeed/picoclaw:launcher
-    container_name: picoclaw-launcher
+  permaclaw-launcher:
+    image: docker.io/aostore/permaclaw:launcher
+    container_name: permaclaw-launcher
     restart: on-failure
     profiles:
       - launcher
     environment:
-      - PICOCLAW_GATEWAY_HOST=0.0.0.0
+      - PERMACLAW_GATEWAY_HOST=0.0.0.0
     ports:
       - "127.0.0.1:18800:18800"
       - "127.0.0.1:18790:18790"
     volumes:
-      - ./data:/root/.picoclaw
+      - ./data:/root/.permaclaw
